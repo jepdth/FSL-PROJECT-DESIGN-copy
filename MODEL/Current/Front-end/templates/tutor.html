@@ -1,0 +1,710 @@
+{% extends "base.html" %}
+{% block title %}Learn - FSL Learning Platform{% endblock %}
+{% block content %}
+
+<!-- Enhanced Header Section -->
+<section class="section animate-fade-in-up">
+  <div class="container text-center">
+    <h1 style="font-size:3rem;font-weight:900;margin-bottom:1rem;color:var(--ink);">Learn Filipino Sign Language</h1>
+    <p class="muted" style="font-size:1.25rem;max-width:80ch;margin:0 auto;color: var(--white);
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.8), 1px 1px 3px rgba(0,0,0,0.9);">
+      Discover essential vocabulary for Grade 1–3 learners through four core categories: Numbers, Colors, Shapes, and Family
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Learning Categories -->
+    <div class="grid grid-2" style="gap:2rem;">
+      <!-- Shapes Category -->
+      <div class="category-card animate-fade-in-up" onclick="showCategory('shapes')">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <h2 style="margin:0;color:var(--accent);font-size:1.5rem;">📐 Shapes</h2>
+            <span class="pill accent">13 Shapes</span>
+          </div>
+          <p class="muted" style="margin-bottom:1.5rem;">Explore thirteen familiar geometric and creative forms with clear illustrations and sign demonstrations.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;">
+            <div class="shape-badge">🔵 Circle (Bilog)</div>
+            <div class="shape-badge">⬜ Square (Parisukat)</div>
+            <div class="shape-badge">🔺 Triangle (Tatsulok)</div>
+            <div class="shape-badge">⬛ Rectangle (Parihaba)</div>
+            <div class="shape-badge">❤️ Heart (Puso)</div>
+            <div class="shape-badge">⭐ Star (Bituin)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colors Category -->
+      <div class="category-card animate-fade-in-up" onclick="showCategory('colors')" style="animation-delay:0.1s;">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <h2 style="margin:0;color:var(--secondary);font-size:1.5rem;">🎨 Colors</h2>
+            <span class="pill secondary">9 Colors</span>
+          </div>
+          <p class="muted" style="margin-bottom:1.5rem;">Master nine vivid and age-appropriate hues with visual prompts and corresponding FSL signs.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;">
+            <div class="color-badge" style="background:#ce2d2d;">Red (Pula)</div>
+            <div class="color-badge" style="background:#3342ce;">Blue (Asul)</div>
+            <div class="color-badge" style="background:#ffe66d;color: black;">Yellow (Dilaw)</div>
+            <div class="color-badge" style="background:#19694a;">Green (Berde)</div>
+            <div class="color-badge" style="background:#2C3E50;">Black (Itim) </div>
+            <div class="color-badge" style="background:#F8F9FA;border:1px solid #dee2e6;color: #15181a;">White (Puti) </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Numbers Category -->
+      <div class="category-card animate-fade-in-up" onclick="showCategory('numbers')" style="animation-delay:0.2s;">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <h2 style="margin:0;color:var(--primary);font-size:1.5rem;">🔢 Numbers</h2>
+            <span class="pill primary">1-100</span>
+          </div>
+          <p class="muted" style="margin-bottom:1.5rem;">Learn to sign numbers from 1 to 100, starting with single digits and progressing to tens, compound numbers, and one hundred.</p>
+          <div style="background:var(--primary-50);padding:1rem;border-radius:var(--radius);margin-bottom:1rem;">
+            <strong>Progression:</strong> Single digits → Tens → Compound numbers → One hundred
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:0.5rem;">
+            <div class="number-badge">1-10</div>
+            <div class="number-badge">11-50</div>
+            <div class="number-badge">51-100</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Family Category -->
+      <div class="category-card animate-fade-in-up" onclick="showCategory('family')" style="animation-delay:0.3s;">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <h2 style="margin:0;color:var(--success);font-size:1.5rem;">👨‍👩‍👧‍👦 Family</h2>
+            <span class="pill sumccess">6 Terms</span>
+          </div>
+          <p class="muted" style="margin-bottom:1.5rem;">Learn six common and relatable family terms that children encounter in daily life.</p>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;">
+            <div class="family-badge">👩 Mother (Nanay)</div>
+            <div class="family-badge">👨 Father (Tatay)</div>
+            <div class="family-badge">👦 Brother (Kapatid na lalaki)</div>
+            <div class="family-badge">👧 Sister (Kapatid na babae)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Content Display Area -->
+    <div id="categoryContent" class="category-content" style="display:none;margin-top:2rem;">
+      <div class="card animate-fade-in-up">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+          <h2 id="contentTitle" style="margin:0;color:var(--primary);font-size:1.5rem;">📚 Category Content</h2>
+          <button class="btn btn-outline" onclick="hideCategory()">← Back to Categories</button>
+        </div>
+
+        <!-- Numbers Content -->
+        <div id="numbersContent" class="category-section">
+          <p class="muted" style="margin-bottom:1.5rem;">Master FSL numbers with step-by-step video demonstrations from 1 to 100.</p>
+
+          <div class="number-range-selector" style="margin-bottom:2rem;">
+            <h4 style="color:var(--secondary);margin-bottom:1rem;">Select Number Range:</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.75rem;margin-bottom:1.5rem;">
+              <button class="btn btn-outline" onclick="loadNumberRange('1-10')">1-10</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('11-20')">11-20</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('21-30')">21-30</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('31-40')">31-40</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('41-50')">41-50</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('51-60')">51-60</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('61-70')">61-70</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('71-80')">71-80</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('81-90')">81-90</button>
+              <button class="btn btn-outline" onclick="loadNumberRange('91-100')">91-100</button>
+            </div>
+          </div>
+
+          <div class="video-container" style="margin-bottom:1.5rem;">
+            <video id="categoryVideo" controls style="width:100%;max-height:400px;border-radius:var(--radius);" muted onloadedmetadata="this.muted = true;">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          <div id="numberSteps" style="background:var(--neutral-50);padding:1.5rem;border-radius:var(--radius);">
+            <h4 style="color:var(--secondary);margin-bottom:1rem;">📋 Learning Steps</h4>
+            <ol id="categorySteps" style="margin:0;padding-left:1.5rem;"></ol>
+          </div>
+        </div>
+
+        <!-- Colors Content -->
+        <div id="colorsContent" class="category-section" style="display:none;">
+          <p class="muted" style="margin-bottom:1.5rem;">Master FSL color signs with visual demonstrations and practical applications.</p>
+
+          <div class="color-selector" style="margin-bottom:2rem;">
+            <h4 style="color:var(--secondary);margin-bottom:1rem;">Select a Color to Learn:</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem;margin-bottom:1.5rem;">
+              <button class="btn btn-outline" onclick="loadColor('red')">Red (Pula)</button>
+              <button class="btn btn-outline" onclick="loadColor('blue')">Blue (Asul)</button>
+              <button class="btn btn-outline" onclick="loadColor('yellow')">Yellow (Dilaw)</button>
+              <button class="btn btn-outline" onclick="loadColor('green')">Green (Berde)</button>
+              <button class="btn btn-outline" onclick="loadColor('orange')">Orange (Kahel)</button>
+              <button class="btn btn-outline" onclick="loadColor('pink')">Pink (Rosas)</button>
+              <button class="btn btn-outline" onclick="loadColor('brown')">Brown (Kayumanggi)</button>
+              <button class="btn btn-outline" onclick="loadColor('black')">Black (Itim)</button>
+              <button class="btn btn-outline" onclick="loadColor('white')">White (Puti)</button>
+            </div>
+          </div>
+
+          <div class="video-container" style="margin-bottom:1.5rem;">
+            <video id="categoryVideo" controls style="width:100%;max-height:400px;border-radius:var(--radius);" muted onloadedmetadata="this.muted = true;">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          <div style="background:var(--neutral-50);padding:1.5rem;border-radius:var(--radius);">
+            <h4 style="color:var(--secondary);margin-bottom:1rem;">📋 Color Learning Steps</h4>
+            <ol id="colorSteps" style="margin:0;padding-left:1.5rem;"></ol>
+          </div>
+        </div>
+
+        <!-- Shapes Content -->
+        <div id="shapesContent" class="category-section" style="display:none;">
+          <p class="muted" style="margin-bottom:1.5rem;">Learn geometric and creative shapes with hands-on signing demonstrations.</p>
+
+          <div class="shape-selector" style="margin-bottom:2rem;">
+            <h4 style="color:var(--accent);margin-bottom:1rem;">Select a Shape to Learn:</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin-bottom:1.5rem;">
+              <button class="btn btn-outline" onclick="loadShape('circle')">🔵 Circle</button>
+              <button class="btn btn-outline" onclick="loadShape('square')">⬜ Square</button>
+              <button class="btn btn-outline" onclick="loadShape('triangle')">🔺 Triangle</button>
+              <button class="btn btn-outline" onclick="loadShape('rectangle')">⬛ Rectangle</button>
+              <button class="btn btn-outline" onclick="loadShape('oval')">🥚 Oval</button>
+              <button class="btn btn-outline" onclick="loadShape('diamond')">💎 Diamond</button>
+              <button class="btn btn-outline" onclick="loadShape('pentagon')">⬟ Pentagon</button>
+              <button class="btn btn-outline" onclick="loadShape('hexagon')">⬢ Hexagon</button>
+              <button class="btn btn-outline" onclick="loadShape('octagon')">🛑 Octagon</button>
+              <button class="btn btn-outline" onclick="loadShape('crescent')">🌙 Crescent</button>
+              <button class="btn btn-outline" onclick="loadShape('heart')">❤️ Heart</button>
+              <button class="btn btn-outline" onclick="loadShape('star')">⭐ Star</button>
+            </div>
+          </div>
+
+          <div class="video-container" style="margin-bottom:1.5rem;">
+            <video id="categoryVideo" controls style="width:100%;max-height:400px;border-radius:var(--radius);" muted onloadedmetadata="this.muted = true;">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          <div style="background:var(--neutral-50);padding:1.5rem;border-radius:var(--radius);">
+            <h4 style="color:var(--accent);margin-bottom:1rem;">📋 Shape Learning Steps</h4>
+            <ol id="shapeSteps" style="margin:0;padding-left:1.5rem;"></ol>
+          </div>
+        </div>
+
+        <!-- Family Content -->
+        <div id="familyContent" class="category-section" style="display:none;">
+          <p class="muted" style="margin-bottom:1.5rem;">Learn essential family relationships and terms used in everyday communication.</p>
+
+          <div class="family-selector" style="margin-bottom:2rem;">
+            <h4 style="color:var(--success);margin-bottom:1rem;">Select a Family Member:</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem;">
+              <button class="btn btn-outline" onclick="loadFamily('mother')">👩 Mother (Nanay)</button>
+              <button class="btn btn-outline" onclick="loadFamily('father')">👨 Father (Tatay)</button>
+              <button class="btn btn-outline" onclick="loadFamily('brother')">👦 Brother</button>
+              <button class="btn btn-outline" onclick="loadFamily('sister')">👧 Sister</button>
+              <button class="btn btn-outline" onclick="loadFamily('baby')">👶 Baby (Sanggol)</button>
+              <button class="btn btn-outline" onclick="loadFamily('family')">🏠 Family (Pamilya)</button>
+            </div>
+          </div>
+
+          <div class="video-container" style="margin-bottom:1.5rem;">
+            <video id="categoryVideo" controls style="width:100%;max-height:400px;border-radius:var(--radius);" muted onloadedmetadata="this.muted = true;">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          <div style="background:var(--neutral-50);padding:1.5rem;border-radius:var(--radius);">
+            <h4 style="color:var(--success);margin-bottom:1rem;">📋 Family Learning Steps</h4>
+            <ol id="familySteps" style="margin:0;padding-left:1.5rem;"></ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Progress Section -->
+<section class="section" style="background:var(--neutral-50);">
+  <div class="container text-center">
+    <h2 class="animate-fade-in-up" style="color:var(--primary);margin-bottom:2rem;">Ready to Practice Your Signs?</h2>
+    <div class="animate-fade-in-up animate-delay-1">
+      <a class="btn" href="{{ url_for('home') }}" style="margin-right:1rem;background:var(--primary);"> <- Back to Home</a>
+      <a class="btn btn-outline" href="{{ url_for('activity') }}" style="background:var(--accent);color:white;border-color:var(--accent);">Start Activity -></a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const PHRASES = [];
+  const phraseButtons = document.getElementById("phraseButtons");
+  const teachVideo = document.getElementById("teachVideo");
+  const teachSteps = document.getElementById("teachSteps");
+
+  // init
+  fetch("/api/phrases").then(r=>r.json()).then(d=>{
+    d.phrases.forEach(p=>{
+      PHRASES.push(p);
+      // tutor buttons
+      const b = document.createElement("button");
+      b.className = "btn btn-outline";
+      b.textContent = p.charAt(0).toUpperCase() + p.slice(1);
+      b.onclick = () => loadTeach(p);
+      phraseButtons.appendChild(b);
+    });
+  });
+
+  // tutor loader
+  async function loadTeach(p){
+    const res = await fetch(`/api/teach?phrase=${encodeURIComponent(p)}`).then(r=>r.json());
+    teachVideo.src = res.video;
+    teachVideo.load();
+    teachSteps.innerHTML = "";
+    (res.steps || []).forEach(s=>{
+      const li=document.createElement("li"); li.textContent = s; teachSteps.appendChild(li);
+    });
+  }
+
+  // Load first phrase by default
+  fetch("/api/phrases").then(r=>r.json()).then(d=>{
+    if(d.phrases && d.phrases.length > 0){
+      loadTeach(d.phrases[0]);
+    }
+  });
+
+  // Category display functions
+  function showCategory(category) {
+    const contentArea = document.getElementById('categoryContent');
+    const categoriesGrid = document.querySelector('.grid.grid-2');
+
+    // Hide categories grid
+    categoriesGrid.style.display = 'none';
+
+    // Show content area
+    contentArea.style.display = 'block';
+
+    // Hide all category sections first
+    document.getElementById('numbersContent').style.display = 'none';
+    document.getElementById('colorsContent').style.display = 'none';
+    document.getElementById('shapesContent').style.display = 'none';
+    document.getElementById('familyContent').style.display = 'none';
+
+    // Load category-specific content
+    if (category === 'numbers') {
+      document.getElementById('contentTitle').innerHTML = '🔢 Numbers Learning Module';
+      document.getElementById('numbersContent').style.display = 'block';
+      loadNumberRange('1-10'); // Load default range
+    } else if (category === 'colors') {
+      document.getElementById('contentTitle').innerHTML = '🎨 Colors Learning Module';
+      document.getElementById('colorsContent').style.display = 'block';
+      loadColor('red'); // Load default color
+    } else if (category === 'shapes') {
+      document.getElementById('contentTitle').innerHTML = '📐 Shapes Learning Module';
+      document.getElementById('shapesContent').style.display = 'block';
+      loadShape('circle'); // Load default shape
+    } else if (category === 'family') {
+      document.getElementById('contentTitle').innerHTML = '👨‍👩‍👧‍👦 Family Learning Module';
+      document.getElementById('familyContent').style.display = 'block';
+      loadFamily('mother'); // Load default family member
+    }
+  }
+
+  function hideCategory() {
+    const contentArea = document.getElementById('categoryContent');
+    const categoriesGrid = document.querySelector('.grid.grid-2');
+
+    // Show categories grid
+    categoriesGrid.style.display = 'grid';
+
+    // Hide content area
+    contentArea.style.display = 'none';
+
+    // Reset all button states in number range selector
+    const numberButtons = document.querySelectorAll('.number-range-selector .btn');
+    numberButtons.forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    });
+
+    // Reset all button states in color selector
+    const colorButtons = document.querySelectorAll('.color-selector .btn');
+    colorButtons.forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    });
+
+    // Reset all button states in shape selector
+    const shapeButtons = document.querySelectorAll('.shape-selector .btn');
+    shapeButtons.forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    });
+
+    // Reset all button states in family selector
+    const familyButtons = document.querySelectorAll('.family-selector .btn');
+    familyButtons.forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    });
+  }
+
+  async function loadNumberRange(range) {
+    // Update button states
+    const buttons = document.querySelectorAll('.number-range-selector .btn');
+    buttons.forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    });
+
+    event.target.classList.remove('btn-outline');
+    event.target.classList.add('btn-primary');
+
+    // Load video and steps for the selected range
+    const video = document.getElementById('categoryVideo');
+    const stepsList = document.getElementById('categorySteps');
+
+    // For demo purposes, we'll use placeholder content
+    // In a real implementation, this would fetch from your backend
+    video.src = `/static/video/numbers_${range.replace('-', '_')}.mp4`;
+
+    // Sample steps for each range
+    const rangeSteps = {
+      '1-10': [
+        'Start with open hand position',
+        'Touch thumb to index finger for number 1',
+        'Touch thumb to middle finger for number 2',
+        'Touch thumb to ring finger for number 3',
+        'Touch thumb to pinky finger for number 4',
+        'Continue pattern up to number 10'
+      ],
+      '11-20': [
+        'Use "1" followed by numbers 1-9',
+        'Number 11: Sign 1 then 1',
+        'Number 12: Sign 1 then 2',
+        'Number 13: Sign 1 then 3',
+        'Continue pattern up to number 20'
+      ],
+      '21-30': [
+        'Use "2" followed by numbers 1-9',
+        'Number 21: Sign 2 then 1',
+        'Number 22: Sign 2 then 2',
+        'Number 23: Sign 2 then 3',
+        'Continue pattern up to number 30'
+      ],
+      '31-40': [
+        'Use "3" followed by numbers 1-9',
+        'Number 31: Sign 3 then 1',
+        'Number 32: Sign 3 then 2',
+        'Number 33: Sign 3 then 3',
+        'Continue pattern up to number 40'
+      ],
+      '41-50': [
+        'Use "4" followed by numbers 1-9',
+        'Number 41: Sign 4 then 1',
+        'Number 42: Sign 4 then 2',
+        'Number 43: Sign 4 then 3',
+        'Continue pattern up to number 50'
+      ],
+      '51-60': [
+        'Use "5" followed by numbers 1-9',
+        'Number 51: Sign 5 then 1',
+        'Number 52: Sign 5 then 2',
+        'Number 53: Sign 5 then 3',
+        'Continue pattern up to number 60'
+      ],
+      '61-70': [
+        'Use "6" followed by numbers 1-9',
+        'Number 61: Sign 6 then 1',
+        'Number 62: Sign 6 then 2',
+        'Number 63: Sign 6 then 3',
+        'Continue pattern up to number 70'
+      ],
+      '71-80': [
+        'Use "7" followed by numbers 1-9',
+        'Number 71: Sign 7 then 1',
+        'Number 72: Sign 7 then 2',
+        'Number 73: Sign 7 then 3',
+        'Continue pattern up to number 80'
+      ],
+      '81-90': [
+        'Use "8" followed by numbers 1-9',
+        'Number 81: Sign 8 then 1',
+        'Number 82: Sign 8 then 2',
+        'Number 83: Sign 8 then 3',
+        'Continue pattern up to number 90'
+      ],
+      '91-100': [
+        'Use "9" followed by numbers 1-9',
+        'Number 91: Sign 9 then 1',
+        'Number 92: Sign 9 then 2',
+        'Continue pattern up to 99',
+        'Use "1" followed by "0" and "0" for 100'
+      ]
+    };
+
+    stepsList.innerHTML = '';
+    (rangeSteps[range] || []).forEach(step => {
+      const li = document.createElement('li');
+      li.textContent = step;
+      stepsList.appendChild(li);
+    });
+  }
+
+  async function loadColor(color) {
+    // Update button states
+    const buttons = document.querySelectorAll('.color-selector .btn');
+    buttons.forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    });
+
+    event.target.classList.remove('btn-outline');
+    event.target.classList.add('btn-primary');
+
+    // Load video and steps for the selected color
+    const video = document.getElementById('categoryVideo');
+    const stepsList = document.getElementById('colorSteps');
+
+    // For demo purposes, we'll use placeholder content
+    video.src = `/static/video/colors_${color}.mp4`;
+
+    // Sample steps for each color
+    const colorSteps = {
+      'red': [
+        'Extend dominant hand forward',
+        'Make a fist with all fingers',
+        'Twist wrist back and forth rapidly',
+        'Movement represents the color red'
+      ],
+      'blue': [
+        'Place hand near forehead',
+        'Move fingers in a wavy motion',
+        'Imitate water or sky movement',
+        'Represents the calming color blue'
+      ],
+      'yellow': [
+        'Hold hand near chin',
+        'Wiggle fingers quickly',
+        'Imitate sunlight or bright light',
+        'Represents the bright color yellow'
+      ],
+      'green': [
+        'Place hand near chest',
+        'Move hand in circular motion',
+        'Imitate growing plants or nature',
+        'Represents the natural color green'
+      ],
+      'orange': [
+        'Hold hand in front of mouth',
+        'Move fingers in a grasping motion',
+        'Imitate eating fruit',
+        'Represents the color orange'
+      ],
+      'pink': [
+        'Touch fingertips to lips',
+        'Gently kiss fingertips',
+        'Move hand away gracefully',
+        'Represents the delicate color pink'
+      ],
+      'brown': [
+        'Make fist with thumb extended',
+        'Rub thumb against fingertips',
+        'Imitate grinding or rubbing motion',
+        'Represents the earthy color brown'
+      ],
+      'black': [
+        'Hold hand flat, palm down',
+        'Move hand side to side slowly',
+        'Imitate darkness or shadow',
+        'Represents the color black'
+      ],
+      'white': [
+        'Hold hand flat, palm up',
+        'Move hand in a lifting motion',
+        'Imitate lightness or clouds',
+        'Represents the pure color white'
+      ]
+    };
+
+    stepsList.innerHTML = '';
+    (colorSteps[color] || []).forEach(step => {
+      const li = document.createElement('li');
+      li.textContent = step;
+      stepsList.appendChild(li);
+    });
+  }
+
+  async function loadShape(shape) {
+    // Update button states
+    const buttons = document.querySelectorAll('.shape-selector .btn');
+    buttons.forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    });
+
+    event.target.classList.remove('btn-outline');
+    event.target.classList.add('btn-primary');
+
+    // Load video and steps for the selected shape
+    const video = document.getElementById('categoryVideo');
+    const stepsList = document.getElementById('shapeSteps');
+
+    video.src = `/static/video/shapes_${shape}.mp4`;
+
+    // Sample steps for each shape
+    const shapeSteps = {
+      'circle': [
+        'Extend index finger of dominant hand',
+        'Draw a circular shape in the air',
+        'Move finger clockwise or counterclockwise',
+        'Complete the circular motion smoothly'
+      ],
+      'square': [
+        'Extend all fingers of dominant hand',
+        'Draw straight lines to form a square',
+        'Move hand right, down, left, up',
+        'Ensure all corners are sharp and defined'
+      ],
+      'triangle': [
+        'Extend index and middle finger',
+        'Draw three straight lines',
+        'Move hand to create three sides',
+        'Ensure equal length sides for equilateral triangle'
+      ],
+      'rectangle': [
+        'Extend all fingers of dominant hand',
+        'Draw two long horizontal lines',
+        'Connect with two short vertical lines',
+        'Maintain rectangular proportions'
+      ],
+      'oval': [
+        'Extend index finger of dominant hand',
+        'Draw an elongated circular shape',
+        'Move finger in an oval pattern',
+        'Maintain consistent shape throughout'
+      ],
+      'diamond': [
+        'Extend index finger and thumb',
+        'Draw four lines to form diamond shape',
+        'Create equal sides with pointed top and bottom',
+        'Ensure symmetrical diamond shape'
+      ],
+      'pentagon': [
+        'Extend all fingers of dominant hand',
+        'Draw five straight lines',
+        'Move hand to create five equal sides',
+        'Ensure all sides and angles are equal'
+      ],
+      'hexagon': [
+        'Extend all fingers of dominant hand',
+        'Draw six straight lines',
+        'Move hand to create six equal sides',
+        'Maintain regular hexagon proportions'
+      ],
+      'octagon': [
+        'Extend all fingers of dominant hand',
+        'Draw eight straight lines',
+        'Move hand to create eight equal sides',
+        'Ensure regular octagon with equal angles'
+      ],
+      'crescent': [
+        'Make a C-shape with dominant hand',
+        'Position hand to show curved shape',
+        'Imitate the curve of a crescent moon',
+        'Maintain smooth curved motion'
+      ],
+      'heart': [
+        'Make two fists with both hands',
+        'Place fists together at knuckles',
+        'Move hands apart while opening fists',
+        'Create the shape of a heart'
+      ],
+      'star': [
+        'Extend all fingers of dominant hand',
+        'Touch all fingertips together',
+        'Open hand quickly to form star shape',
+        'Repeat motion for five-pointed star'
+      ]
+    };
+
+    stepsList.innerHTML = '';
+    (shapeSteps[shape] || []).forEach(step => {
+      const li = document.createElement('li');
+      li.textContent = step;
+      stepsList.appendChild(li);
+    });
+  }
+
+  async function loadFamily(member) {
+    // Update button states
+    const buttons = document.querySelectorAll('.family-selector .btn');
+    buttons.forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    });
+
+    event.target.classList.remove('btn-outline');
+    event.target.classList.add('btn-primary');
+
+    // Load video and steps for the selected family member
+    const video = document.getElementById('categoryVideo');
+    const stepsList = document.getElementById('familySteps');
+
+    video.src = `/static/video/family_${member}.mp4`;
+
+    // Sample steps for each family member
+    const familySteps = {
+      'mother': [
+        'Touch chin with fingertips',
+        'Move hand down and away',
+        'Gesture represents care and nurturing',
+        'Most common sign for mother'
+      ],
+      'father': [
+        'Touch forehead with fingertips',
+        'Move hand forward and down',
+        'Gesture represents authority and guidance',
+        'Traditional sign for father'
+      ],
+      'brother': [
+        'Sign "male" then "same"',
+        'First indicate gender',
+        'Then show same level or equality',
+        'Complete the brother relationship'
+      ],
+      'sister': [
+        'Sign "female" then "same"',
+        'First indicate gender',
+        'Then show same level or equality',
+        'Complete the sister relationship'
+      ],
+      'baby': [
+        'Cradle arms as if holding infant',
+        'Rock arms gently back and forth',
+        'Gesture represents nurturing a child',
+        'Universal sign for baby'
+      ],
+      'family': [
+        'Circle hand around face',
+        'Include all family members',
+        'Gesture represents group unity',
+        'Brings everyone together in the sign'
+      ]
+    };
+
+    stepsList.innerHTML = '';
+    (familySteps[member] || []).forEach(step => {
+      const li = document.createElement('li');
+      li.textContent = step;
+      stepsList.appendChild(li);
+    });
+  }
+</script>
+
+{% endblock %}
