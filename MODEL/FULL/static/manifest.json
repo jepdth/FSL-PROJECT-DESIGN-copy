@@ -1,0 +1,206 @@
+﻿{
+    "family":  {
+                   "auntie":  [
+                                  "/static/video/family/auntie_01.mp4",
+                                  "/static/video/family/auntie_02.mp4",
+                                  "/static/video/family/auntie_03.mp4",
+                                  "/static/video/family/auntie_04.mp4"
+                              ],
+                   "parents":  [
+                                   "/static/video/family/parents_01.mp4",
+                                   "/static/video/family/parents_02.mp4",
+                                   "/static/video/family/parents_03.mp4"
+                               ],
+                   "grandfather":  [
+                                       "/static/video/family/grandfather_01.mp4",
+                                       "/static/video/family/grandfather_02.mp4",
+                                       "/static/video/family/grandfather_03.mp4",
+                                       "/static/video/family/grandfather_04.mp4"
+                                   ],
+                   "daughter":  [
+                                    "/static/video/family/daughter_01.mp4",
+                                    "/static/video/family/daughter_02.mp4",
+                                    "/static/video/family/daughter_03.mp4",
+                                    "/static/video/family/daughter_04.mp4"
+                                ],
+                   "father":  [
+                                  "/static/video/family/father_01.mp4",
+                                  "/static/video/family/father_02.mp4",
+                                  "/static/video/family/father_03.mp4",
+                                  "/static/video/family/father_04.mp4"
+                              ],
+                   "mother":  [
+                                  "/static/video/family/mother_01.mp4",
+                                  "/static/video/family/mother_02.mp4",
+                                  "/static/video/family/mother_03.mp4",
+                                  "/static/video/family/mother_04.mp4"
+                              ],
+                   "son":  [
+                               "/static/video/family/son_01.mp4",
+                               "/static/video/family/son_02.mp4",
+                               "/static/video/family/son_03.mp4",
+                               "/static/video/family/son_04.mp4"
+                           ],
+                   "cousin":  [
+                                  "/static/video/family/cousin_01.mp4",
+                                  "/static/video/family/cousin_02.mp4",
+                                  "/static/video/family/cousin_03.mp4",
+                                  "/static/video/family/cousin_04.mp4"
+                              ],
+                   "uncle":  [
+                                 "/static/video/family/uncle_01.mp4",
+                                 "/static/video/family/uncle_02.mp4",
+                                 "/static/video/family/uncle_03.mp4",
+                                 "/static/video/family/uncle_04.mp4"
+                             ],
+                   "grandmother":  [
+                                       "/static/video/family/grandmother_01.mp4",
+                                       "/static/video/family/grandmother_02.mp4",
+                                       "/static/video/family/grandmother_03.mp4",
+                                       "/static/video/family/grandmother_04.mp4"
+                                   ]
+               },
+    "numbers":  {
+                    "six":  [
+                                "/static/video/numbers/six_01.mp4",
+                                "/static/video/numbers/six_02.mp4",
+                                "/static/video/numbers/six_03.mp4",
+                                "/static/video/numbers/six_04.mp4"
+                            ],
+                    "four":  [
+                                 "/static/video/numbers/four_01.mp4",
+                                 "/static/video/numbers/four_02.mp4",
+                                 "/static/video/numbers/four_03.mp4",
+                                 "/static/video/numbers/four_04.mp4"
+                             ],
+                    "three":  [
+                                  "/static/video/numbers/three_01.mp4",
+                                  "/static/video/numbers/three_02.mp4",
+                                  "/static/video/numbers/three_03.mp4",
+                                  "/static/video/numbers/three_04.mp4"
+                              ],
+                    "one":  [
+                                "/static/video/numbers/one_01.mp4",
+                                "/static/video/numbers/one_02.mp4",
+                                "/static/video/numbers/one_03.mp4",
+                                "/static/video/numbers/one_04.mp4"
+                            ],
+                    "seven":  [
+                                  "/static/video/numbers/seven_01.mp4",
+                                  "/static/video/numbers/seven_02.mp4",
+                                  "/static/video/numbers/seven_03.mp4",
+                                  "/static/video/numbers/seven_04.mp4"
+                              ],
+                    "eight":  [
+                                  "/static/video/numbers/eight_01.mp4",
+                                  "/static/video/numbers/eight_02.mp4",
+                                  "/static/video/numbers/eight_03.mp4",
+                                  "/static/video/numbers/eight_04.mp4"
+                              ],
+                    "five":  [
+                                 "/static/video/numbers/five_01.mp4",
+                                 "/static/video/numbers/five_02.mp4",
+                                 "/static/video/numbers/five_03.mp4",
+                                 "/static/video/numbers/five_04.mp4"
+                             ],
+                    "ten":  [
+                                "/static/video/numbers/ten_01.mp4",
+                                "/static/video/numbers/ten_02.mp4",
+                                "/static/video/numbers/ten_03.mp4",
+                                "/static/video/numbers/ten_04.mp4"
+                            ],
+                    "nine":  [
+                                 "/static/video/numbers/nine_01.mp4",
+                                 "/static/video/numbers/nine_02.mp4",
+                                 "/static/video/numbers/nine_03.mp4",
+                                 "/static/video/numbers/nine_04.mp4"
+                             ],
+                    "two":  [
+                                "/static/video/numbers/two_01.mp4",
+                                "/static/video/numbers/two_02.mp4",
+                                "/static/video/numbers/two_03.mp4",
+                                "/static/video/numbers/two_04.mp4"
+                            ]
+                },
+    "version":  1,
+    "colors":  {
+                   "red":  [
+                               "/static/video/colors/red_01.mp4",
+                               "/static/video/colors/red_02.mp4",
+                               "/static/video/colors/red_03.mp4",
+                               "/static/video/colors/red_04.mp4"
+                           ],
+                   "pink":  [
+                                "/static/video/colors/pink_01.mp4",
+                                "/static/video/colors/pink_02.mp4",
+                                "/static/video/colors/pink_03.mp4",
+                                "/static/video/colors/pink_04.mp4"
+                            ],
+                   "black":  [
+                                 "/static/video/colors/black_01.mp4",
+                                 "/static/video/colors/black_02.mp4",
+                                 "/static/video/colors/black_03.mp4",
+                                 "/static/video/colors/black_04.mp4"
+                             ],
+                   "dark":  [
+                                "/static/video/colors/dark_01.mp4",
+                                "/static/video/colors/dark_02.mp4",
+                                "/static/video/colors/dark_03.mp4",
+                                "/static/video/colors/dark_04.mp4"
+                            ],
+                   "brown":  [
+                                 "/static/video/colors/brown_01.mp4",
+                                 "/static/video/colors/brown_02.mp4",
+                                 "/static/video/colors/brown_03.mp4",
+                                 "/static/video/colors/brown_04.mp4"
+                             ],
+                   "violet":  [
+                                  "/static/video/colors/violet_01.mp4",
+                                  "/static/video/colors/violet_02.mp4",
+                                  "/static/video/colors/violet_03.mp4",
+                                  "/static/video/colors/violet_04.mp4"
+                              ],
+                   "yellow":  [
+                                  "/static/video/colors/yellow_01.mp4",
+                                  "/static/video/colors/yellow_02.mp4",
+                                  "/static/video/colors/yellow_03.mp4",
+                                  "/static/video/colors/yellow_04.mp4"
+                              ],
+                   "blue":  [
+                                "/static/video/colors/blue_01.mp4",
+                                "/static/video/colors/blue_02.mp4",
+                                "/static/video/colors/blue_03.mp4",
+                                "/static/video/colors/blue_04.mp4"
+                            ],
+                   "gray":  [
+                                "/static/video/colors/gray_01.mp4",
+                                "/static/video/colors/gray_02.mp4",
+                                "/static/video/colors/gray_03.mp4",
+                                "/static/video/colors/gray_04.mp4"
+                            ],
+                   "white":  [
+                                 "/static/video/colors/white_01.mp4",
+                                 "/static/video/colors/white_02.mp4",
+                                 "/static/video/colors/white_03.mp4",
+                                 "/static/video/colors/white_04.mp4"
+                             ],
+                   "light":  [
+                                 "/static/video/colors/light_01.mp4",
+                                 "/static/video/colors/light_02.mp4",
+                                 "/static/video/colors/light_03.mp4",
+                                 "/static/video/colors/light_04.mp4"
+                             ],
+                   "orange":  [
+                                  "/static/video/colors/orange_01.mp4",
+                                  "/static/video/colors/orange_02.mp4",
+                                  "/static/video/colors/orange_03.mp4",
+                                  "/static/video/colors/orange_04.mp4"
+                              ],
+                   "green":  [
+                                 "/static/video/colors/green_01.mp4",
+                                 "/static/video/colors/green_02.mp4",
+                                 "/static/video/colors/green_03.mp4",
+                                 "/static/video/colors/green_04.mp4"
+                             ]
+               }
+}
