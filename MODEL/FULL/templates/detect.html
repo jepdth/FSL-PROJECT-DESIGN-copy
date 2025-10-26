@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Learn FSL - Interactive Learning Platform{% endblock %}
+{% block content %}
+
+<!-- Interactive Learning Section -->
+<section class="section">
+  <div class="container">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
+      <div>
+        <h1 style="margin:0;color:#2d5a3d;font-size:2rem;">🎯 Practice & Evaluate</h1>
+        <p style="color:#666;margin:0.5rem 0 0 0;">Practice signing the phrase shown below using your camera, then get AI-powered feedback and guidance.</p>
+      </div>
+      <button id="nextChallenge" class="btn" style="background:var(--primary);color:white;border:none;padding:0.75rem 1.5rem;border-radius:var(--radius);">🎲 New Challenge</button>
+    </div>
+
+    <!-- Target Phrase Card -->
+    <div style="background:linear-gradient(135deg, #F5A623, #E4961A);color:white;padding:2rem;border-radius:12px;margin-bottom:2rem;text-align:center;position:static;transform:none !important;animation:none !important;transition:none !important;">
+      <div style="font-size:0.875rem;opacity:0.9;margin-bottom:0.5rem;">Target Phrase:</div>
+      <div style="font-size:2rem;font-weight:700;position:static;transform:none !important;animation:none !important;transition:none !important;" id="targetPhrase">Loading...</div>
+    </div>
+
+    <!-- Camera Section -->
+    <div style="background:#1a1a1a;border-radius:12px;padding:1rem;margin-bottom:2rem;">
+      <div style="color:#ccc;font-size:0.875rem;margin-bottom:1rem;">📹 Live Camera</div>
+      <video id="cam" autoplay muted playsinline style="width:100%;height:300px;object-fit:cover;border-radius:8px;"></video>
+    </div>
+
+    <!-- Control Buttons -->
+    <div style="margin-bottom:2rem;">
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;">
+        <button id="startCam" class="btn" style="background:var(--primary);color:white;border:none;flex:1;padding:0.875rem;border-radius:var(--radius);font-size:0.875rem;">Start Camera</button>
+        <button id="startRec" class="btn" style="background:var(--secondary);color:white;border:none;flex:1;padding:0.875rem;border-radius:var(--radius);font-size:0.875rem;">Start Recording</button>
+      </div>
+      <button id="stopRec" class="btn" style="background:var(--accent);color:white;border:none;width:100%;padding:0.875rem;border-radius:var(--radius);font-size:0.875rem;">Stop & Evaluate</button>
+    </div>
+
+    <!-- Demo Mode Section -->
+    <details style="background:#f8f9fa;padding:1rem;border-radius:8px;">
+      <summary style="color:#666;cursor:pointer;padding:0.5rem;">🤔 No camera? Try manual input (Demo Mode)</summary>
+      <div style="margin-top:1rem;display:flex;gap:1rem;">
+        <select id="attemptPick" style="flex:1;padding:0.75rem;border:1px solid #ddd;border-radius:6px;"></select>
+        <input id="attemptManual" placeholder="Type your attempt..." style="flex:1;padding:0.75rem;border:1px solid #ddd;border-radius:6px;" />
+        <button id="assessManual" class="btn" style="background:#6c757d;color:white;border:none;padding:0.75rem;border-radius:6px;">✨ Assess</button>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- Feedback Section -->
+<section class="section" id="feedbackSec">
+  <div class="container">
+    <div style="background:white;padding:2rem;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+      <h2 style="margin:0 0 1.5rem 0;color:#2d5a3d;">📊 Performance Feedback</h2>
+
+      <div id="feedbackBox" style="display:none;padding:1rem;border-radius:8px;margin-bottom:1.5rem;"></div>
+
+      <div id="reteach" style="display:none;">
+        <h3 style="margin:0 0 1rem 0;color:#2d5a3d;">🎓 Learn the Correct Sign</h3>
+
+        <div style="background:#1a1a1a;border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
+          <video id="reteachVideo" controls style="width:100%;border-radius:6px;"></video>
+        </div>
+
+        <div style="background:#f8f9fa;padding:1.5rem;border-radius:8px;">
+          <h4 style="margin:0 0 1rem 0;color:#2d5a3d;">📝 Correct Steps:</h4>
+          <ol id="reteachSteps" style="margin:0;padding-left:1.5rem;"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const PHRASES = [];
+  const phraseButtons = document.getElementById("phraseButtons");
+  const teachVideo = document.getElementById("teachVideo");
+  const teachSteps = document.getElementById("teachSteps");
+
+  const targetEl = document.getElementById("targetPhrase");
+  const cam = document.getElementById("cam");
+  const startCamBtn = document.getElementById("startCam");
+  const startRecBtn = document.getElementById("startRec");
+  const stopRecBtn = document.getElementById("stopRec");
+
+  const attemptPick = document.getElementById("attemptPick");
+  const attemptManual = document.getElementById("attemptManual");
+  const assessManualBtn = document.getElementById("assessManual");
+
+  const feedbackBox = document.getElementById("feedbackBox");
+  const reteach = document.getElementById("reteach");
+  const reteachVideo = document.getElementById("reteachVideo");
+  const reteachSteps = document.getElementById("reteachSteps");
+
+  let mediaStream = null;
+  let frames = [];
+  let target = "";
+
+  // Load random challenge
+  loadRandom();
+  async function loadRandom(){
+    try {
+      const response = await fetch("/api/random");
+      const data = await response.json();
+      target = data.phrase;
+      if (targetEl) {
+        targetEl.textContent = data.phrase;
+      }
+    } catch (e) {
+      console.error("Failed to load random phrase:", e);
+      if (targetEl) {
+        targetEl.textContent = "how are you";
+      }
+      target = "how are you";
+    }
+  }
+
+  // New challenge button
+  if (document.getElementById("nextChallenge")) {
+    document.getElementById("nextChallenge").onclick = loadRandom;
+  }
+
+  // Camera functions
+  startCamBtn.onclick = async ()=>{
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      cam.srcObject = mediaStream;
+    } catch(e) {
+      alert("Could not access camera: " + e.message);
+    }
+  };
+
+  // Recording functions
+  startRecBtn.onclick = ()=>{
+    frames = [];
+    if(!mediaStream) return;
+    const track = mediaStream.getVideoTracks()[0];
+    const capture = new ImageCapture(track);
+    let count = 0;
+
+    const grabFrame = async ()=>{
+      try {
+        const bmp = await capture.grabFrame();
+        const canvas = document.createElement("canvas");
+        canvas.width = 320; canvas.height = 180;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(bmp, 0, 0, 320, 180);
+        frames.push(canvas.toDataURL("image/jpeg", 0.6));
+        count++;
+        if(count < 8) setTimeout(grabFrame, 200);
+      } catch(e) { console.warn(e); }
+    };
+    grabFrame();
+  };
+
+  // Stop and evaluate
+  stopRecBtn.onclick = async ()=>{
+    const body = { target, frames };
+    const res = await fetch("/api/assess", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(r=>r.json());
+    showFeedback(res);
+  };
+
+  // Manual assessment
+  assessManualBtn.onclick = async ()=>{
+    const attempt = attemptManual.value.trim() || attemptPick.value;
+    const res = await fetch("/api/assess", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ target, attempt_text: attempt })
+    }).then(r=>r.json());
+    showFeedback(res);
+  };
+
+  // Show feedback
+  function showFeedback(res){
+    feedbackBox.style.display = "block";
+    if(res.correct){
+      feedbackBox.className = "success";
+      feedbackBox.innerHTML = "✅ Correct!";
+      reteach.style.display = "none";
+    } else {
+      feedbackBox.className = "danger";
+      feedbackBox.innerHTML = `❌ Incorrect. Target: ${res.target}<br>${(res.hints||[]).join(" ")}`;
+      reteach.style.display = "block";
+      reteachVideo.src = (res.teach && res.teach.video) || "";
+      reteachSteps.innerHTML = "";
+      (res.teach && res.teach.steps || []).forEach(s=>{
+        const li = document.createElement("li");
+        li.textContent = s;
+        reteachSteps.appendChild(li);
+      });
+    }
+  }
+</script>
+
+{% endblock %}

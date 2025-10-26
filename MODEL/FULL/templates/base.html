@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}FSL Learning - Filipino Sign Language AI{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="AI-powered Filipino Sign Language learning platform with real-time gesture recognition and interactive feedback" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="navbar animate-fade-in-down">
+    <div class="container nav-inner">
+      <div class="brand">
+        <a href="{{ url_for('home') }}" class="brand-link" style="display:flex;align-items:center;gap:1rem;text-decoration:none;color:inherit;">
+          <div class="brand-logo" style="cursor:pointer;transition:transform 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="{{ url_for('static', filename='img/logo4.png') }}" alt="FSL Learning Logo" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg);">
+          </div>
+          <div style="cursor:pointer;">
+            <div class="brand-title" style="transition:color 0.2s ease;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='inherit'">FSL Learning</div>
+            <div class="tagline">AI-Powered Sign Language Education</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- ====================== -->
+      <!-- Main Navigation Links -->
+      <!-- ====================== -->
+      <nav class="flex animate-fade-in-up">
+        <a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">HOME</a>
+        {% if session.get('authenticated') %}
+          <a href="{{ url_for('tutor') }}" class="{% if request.endpoint == 'tutor' %}active{% endif %}">LEARN</a>
+          <a href="{{ url_for('activity') }}" class="{% if request.endpoint == 'activity' %}active{% endif %}">ACTIVITY</a>
+          <!-- ✅ New Auto Recognition Page Link -->
+          <a href="{{ url_for('auto_recognition') }}" class="{% if request.endpoint == 'auto_recognition' %}active{% endif %}">AUTO</a>
+          <a href="{{ url_for('results') }}" class="{% if request.endpoint == 'results' %}active{% endif %}">RESULTS</a>
+        {% endif %}
+        <a href="{{ url_for('about') }}" class="{% if request.endpoint == 'about' %}active{% endif %}">ABOUT</a>
+      </nav>
+
+      <!-- Right-aligned login/logout button -->
+      {% if not session.get('authenticated') %}
+        <!--<a href="{{ url_for('login') }}" class="auth-corner-btn {% if request.endpoint == 'login' %}active{% endif %}">LOGIN</a>-->
+      {% else %}
+        <!--<a href="{{ url_for('logout') }}" class="auth-corner-btn {% if request.endpoint == 'logout' %}active{% endif %}">LOGOUT</a>-->
+      {% endif %}
+    </div>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <!-- ====================== -->
+  <!-- FOOTER -->
+  <!-- ====================== -->
+  <footer class="footer animate-fade-in-up" style="animation-delay:0.5s;">
+    <div class="container">
+      <div class="grid grid-2">
+        <div class="text-center">
+          <h4 style="color:var(--primary);font-weight:800;margin-bottom:1rem;">FSL Learning</h4>
+          <p class="muted" style="color:black;">Filipino Sign Language Education</p>
+        </div>
+        <div class="text-center">
+          <h4 style="color:var(--secondary);font-weight:800;margin-bottom:1rem;">Quick Links</h4>
+          <div class="flex" style="justify-content:center;flex-wrap:wrap;gap:.75rem;">
+            <a href="{{ url_for('home') }}" class="animate-fade-in-left">Home</a>
+            {% if session.get('authenticated') %}
+              <a href="{{ url_for('tutor') }}" class="animate-fade-in-right">Learn</a>
+              <a href="{{ url_for('activity') }}" class="animate-fade-in-up">Activity</a>
+              <!-- ✅ Add Auto Recognition in footer links -->
+              <a href="{{ url_for('auto_recognition') }}" class="animate-fade-in-up">Auto</a>
+              <a href="{{ url_for('results') }}" class="animate-fade-in-left">Results</a>
+            {% endif %}
+            <a href="{{ url_for('about') }}" class="animate-fade-in-right">About</a>
+          </div>
+        </div>
+      </div>
+      <div class="text-center" style="margin-top:2rem;padding-top:2rem;border-top:1px solid var(--neutral-200);">
+        <div style="color:black;">© <span id="year"></span> FSL Learning • TEAM 13</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Smooth scroll helper
+    function scrollToId(id){
+      const el=document.getElementById(id);
+      if(el) el.scrollIntoView({behavior:"smooth"});
+    }
+
+    // Scroll-triggered animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const animateElements = document.querySelectorAll('.card, .section h2, .hero-grid > *');
+      animateElements.forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+    });
+  </script>
+</body>
+</html>

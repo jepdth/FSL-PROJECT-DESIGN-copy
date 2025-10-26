@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Home – FSL Learning{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="animate-fade-in-up">
+      <h1 class="h1">Real-time FSL Recognition with Interactive Feedback</h1>
+      <p class="muted">
+        Learn Filipino Sign Language through an LSTM-based system 
+        that recognizes your gestures and gives real-time feedback. 
+        Watch <strong>demonstration videos</strong>, receive <strong>corrective guidance</strong>, 
+        and <strong>improve your sign language</strong> 
+        with every practice — all in one interactive learning platform.
+      </p>
+
+      <!-- Feature highlights -->
+      <div class="flex" style="margin-top:2rem;gap:2rem;flex-wrap:wrap;">
+        <div class="flex" style="align-items:center;gap:0.5rem;">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--success);"></div>
+          <span style="font-size:0.875rem;color:var(--ink);">Real-time Recognition</span>
+        </div>
+        <div class="flex" style="align-items:center;gap:0.5rem;">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--primary);"></div>
+          <span style="font-size:0.875rem;color:var(--ink);">Instant Feedback</span>
+        </div>
+        <div class="flex" style="align-items:center;gap:0.5rem;">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></div>
+          <span style="font-size:0.875rem;color:var(--ink);">Performance Feedback</span>
+        </div>
+      </div>
+
+      <div class="flex" style="margin-top:2.5rem;gap:1rem;flex-wrap:wrap;justify-content:center;">
+        {% if session.get('authenticated') %}
+          <a class="btn btn-pill btn-large" href="{{ url_for('tutor') }}" style="font-size:1.125rem;padding:1rem 2rem;">Start Learning</a>
+        {% else %}
+          <a class="btn btn-pill btn-large" href="{{ url_for('login') }}" style="font-size:1.125rem;padding:1rem 2rem;">Start Learning</a>
+        {% endif %}
+        <a class="btn btn-outline" href="{{ url_for('about') }}">Learn More</a>
+      </div>
+    </div>
+
+
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="section">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:4rem;">
+      <h2 style="font-size:2.5rem;font-weight:900;margin-bottom:1rem;color:var(--ink);">Why Choose Our Platform?</h2>
+      <p class="muted" style="font-size:1.125rem;max-width:60ch;margin:0 auto;color: var(--white);
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.8), 1px 1px 3px rgba(0,0,0,0.9);">
+        Advanced technology meets accessibility to create the most effective FSL learning experience
+      </p>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="card animate-fade-in-up text-center">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg, var(--primary), var(--primary-light));margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;font-size:2rem;color:white;">🤖</div>
+        <h3 style="font-weight:800;font-size:1.25rem;color:var(--ink);margin-bottom:1rem;">AI-Powered Recognition</h3>
+        <p class="muted">Advanced LSTM neural networks provide accurate, real-time gesture recognition with continuous learning capabilities.</p>
+      </div>
+
+      <div class="card animate-fade-in-up text-center" style="animation-delay:0.1s;">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg, var(--secondary), var(--secondary-light));margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;font-size:2rem;color:white;">📚</div>
+        <h3 style="font-weight:800;font-size:1.25rem;color:var(--ink);margin-bottom:1rem;">Interactive Learning</h3>
+        <p class="muted">Dual-mode system with tutor mode for guided learning and activity mode for practical application and testing.</p>
+      </div>
+
+      <div class="card animate-fade-in-up text-center" style="animation-delay:0.2s;">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg, var(--accent), var(--accent-light));margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;font-size:2rem;color:white;">📈</div>
+        <h3 style="font-weight:800;font-size:1.25rem;color:var(--ink);margin-bottom:1rem;">Performance Feedback</h3>
+        <p class="muted">Real-time evaluation and corrective insights help you improve your sign language accuracy and enhance your learning progress.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+{% endblock %}

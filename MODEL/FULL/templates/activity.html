@@ -1,0 +1,607 @@
+{% extends "base.html" %}
+{% block title %}Activity Mode – FSL Learning{% endblock %}
+{% block content %}
+
+<section class="section py-5" style="min-height:90vh;background:rgba(250,250,255,0.7);backdrop-filter:blur(6px);">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold text-primary mb-0">🎯 Activity Mode</h4>
+      <div class="d-flex align-items-center gap-2">
+        <button id="resetBtn" class="btn btn-outline-secondary btn-sm">↺ Reset</button>
+        <span id="stateBadge" class="badge bg-secondary text-dark fs-6 px-3 py-2 shadow-sm">State: READY</span>
+      </div>
+    </div>
+
+    <div class="row g-4 align-items-stretch mb-4">
+      <div class="col-lg-6 position-relative">
+        <div class="card shadow-sm border-0 h-100 rounded-4 position-relative overflow-hidden">
+          <video id="mainCamera" autoplay playsinline muted style="width:100%;height:100%;background:#000;aspect-ratio:4/3;border-radius:1rem;z-index:1;transform:scaleX(-1);"></video>
+          <canvas id="overlayCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;border-radius:1rem;z-index:2;"></canvas>
+
+          <div id="ghostBadge" class="position-absolute top-0 end-0 m-3 px-3 py-1 rounded-pill fw-bold" style="display:none;z-index:9;background:rgba(59,130,246,.95);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.3);">👻 Ghost ON</div>
+
+          <div id="ghostControls" class="position-absolute top-0 start-0 m-3 d-flex gap-2" style="display:none;z-index:10;">
+            <button id="btnSizeDown" class="btn btn-sm btn-light px-2">Size −</button>
+            <button id="btnSizeUp" class="btn btn-sm btn-light px-2">Size +</button>
+            <button id="btnNudgeUp" class="btn btn-sm btn-light px-2">Align ↑</button>
+            <button id="btnNudgeDown" class="btn btn-sm btn-light px-2">Align ↓</button>
+          </div>
+
+          <div id="prepOverlay" class="position-absolute top-50 start-50 translate-middle fw-bold text-warning" style="font-size:3.2rem;display:none;z-index:8;text-shadow:3px 3px 8px #000;">Get Ready…</div>
+          <div id="recBadge" class="position-absolute top-0 start-0 m-3 px-3 py-1 rounded-pill fw-bold" style="display:none;z-index:9;background:#b10000;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.3);">● REC</div>
+          <div class="position-absolute bottom-0 start-0 w-100" style="height:6px;background:rgba(255,255,255,.3);">
+            <div id="timerBar" style="height:100%;width:0%;background:#22c55e;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card shadow-sm border-0 p-4 h-100 rounded-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="text-start">
+              <h6 class="text-muted mb-1">Selected Gesture</h6>
+              <p id="targetLabel" class="fs-4 text-primary fw-bold mb-0">None</p>
+            </div>
+            <div id="resultText" class="fs-4 fw-bold text-secondary">—</div>
+          </div>
+          <hr>
+          <div class="mb-2 d-flex justify-content-between align-items-center">
+            <span id="capturePhase" class="text-muted">Idle</span>
+            <span class="text-muted"><span id="frameCount">0</span>/48 frames</span>
+          </div>
+          <div class="progress" style="height:12px;">
+            <div id="progressBar" class="progress-bar" role="progressbar" style="width:0%"></div>
+          </div>
+
+          <div id="assistRow" class="mt-3" style="display:none;">
+            <button id="btnShowHow" class="btn btn-outline-secondary btn-sm">👻 Show me how</button>
+            <button id="btnTryAgain" class="btn btn-primary btn-sm">↻ Try again</button>
+            <span id="assistHint" class="text-muted small ms-2"></span>
+          </div>
+
+          <div class="d-flex justify-content-around mt-4">
+            <div><span class="text-success fw-bold fs-5" id="correctCount">0</span><p class="mb-0">Correct</p></div>
+            <div><span class="text-danger fw-bold fs-5" id="incorrectCount">0</span><p class="mb-0">Incorrect</p></div>
+          </div>
+          <p class="text-muted mt-3 mb-0">Flow: Start → Get Ready (1s) → Perform (~5s) → Predict / Stop.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 text-center bg-white">
+      <div class="mb-3">
+        <button class="btn btn-outline-primary mx-2 fw-semibold category-btn" data-cat="numbers">🔢 Numbers</button>
+        <button class="btn btn-outline-primary mx-2 fw-semibold category-btn" data-cat="family">👨‍👩‍👧‍👦 Family</button>
+        <button class="btn btn-outline-primary mx-2 fw-semibold category-btn" data-cat="colors">🎨 Colors</button>
+      </div>
+      <div id="gestureChoices" class="mt-3"></div>
+    </div>
+
+    <div class="text-center">
+      <button id="startBtn" class="btn btn-success btn-lg shadow-sm">▶ Start</button>
+      <button id="stopBtn" class="btn btn-danger btn-lg shadow-sm" style="display:none;">⏹ Stop</button>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js"></script>
+
+<script>
+window.addEventListener("load", () => {
+  const STATIC_BASE = (window.location.origin + '/static/video').replace(/\/+$/, '');
+
+  const videoEl = document.getElementById("mainCamera");
+  const canvasEl = document.getElementById("overlayCanvas");
+  const ctx = canvasEl.getContext("2d");
+
+  const startBtn = document.getElementById("startBtn");
+  const stopBtn = document.getElementById("stopBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const stateBadge = document.getElementById("stateBadge");
+  const targetLabel = document.getElementById("targetLabel");
+  const resultText = document.getElementById("resultText");
+  const correctCountEl = document.getElementById("correctCount");
+  const incorrectCountEl = document.getElementById("incorrectCount");
+  const capturePhase = document.getElementById("capturePhase");
+  const frameCountEl = document.getElementById("frameCount");
+  const progressBar = document.getElementById("progressBar");
+  const prepOverlay = document.getElementById("prepOverlay");
+  const recBadge = document.getElementById("recBadge");
+  const timerBar = document.getElementById("timerBar");
+  const ghostBadge = document.getElementById("ghostBadge");
+  const ghostControls = document.getElementById("ghostControls");
+  const btnSizeDown = document.getElementById("btnSizeDown");
+  const btnSizeUp = document.getElementById("btnSizeUp");
+  const btnNudgeUp = document.getElementById("btnNudgeUp");
+  const btnNudgeDown = document.getElementById("btnNudgeDown");
+
+  const assistRow = document.getElementById("assistRow");
+  const btnShowHow = document.getElementById("btnShowHow");
+  const btnTryAgain = document.getElementById("btnTryAgain");
+  const assistHint = document.getElementById("assistHint");
+
+  const hud = document.createElement("div");
+  Object.assign(hud.style, { position: "absolute", right: "10px", bottom: "10px", zIndex: "10", background: "rgba(0,0,0,.55)", color: "#fff", font: "12px/1.2 system-ui,Segoe UI,Roboto,Arial", padding: "6px 8px", borderRadius: "8px", pointerEvents: "none" });
+  hud.textContent = "—";
+  canvasEl.parentElement.appendChild(hud);
+
+  const categories = {
+    colors: ["Black","Blue","Brown","Dark","Gray","Green","Light","Orange","Pink","Red","Violet","White","Yellow"],
+    family: ["Auntie","Uncle","Son","Daughter","Father","Mother","Grandmother","Grandfather","Cousin","Parents"],
+    numbers: ["One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten"]
+  };
+
+  function normLabel(s){
+    if(!s) return "";
+    const x = String(s).toLowerCase().replace(/[^a-z0-9]+/g,'');
+    const map = {
+      "1":"one","2":"two","3":"three","4":"four","5":"five","6":"six","7":"seven","8":"eight","9":"nine","10":"ten",
+      "grandmother":"grandmother","grandma":"grandmother","lola":"grandmother",
+      "grandfather":"grandfather","grandpa":"grandfather","lolo":"grandfather",
+      "mom":"mother","mother":"mother","nanay":"mother",
+      "dad":"father","father":"father","tatay":"father",
+      "aunt":"auntie","auntie":"auntie","tita":"auntie",
+      "uncle":"uncle","tito":"uncle",
+      "boy":"son","girl":"daughter",
+      "purple":"violet","violet":"violet","grey":"gray","gray":"gray",
+      "light":"light","dark":"dark",
+      "white":"white","black":"black","blue":"blue","brown":"brown","green":"green","orange":"orange","pink":"pink","red":"red","yellow":"yellow"
+    };
+    return map[x] || x;
+  }
+  function inferCategory(label){
+    const l = normLabel(label);
+    if (["one","two","three","four","five","six","seven","eight","nine","ten"].includes(l)) return "numbers";
+    if (["auntie","uncle","son","daughter","father","mother","grandmother","grandfather","cousin","parents"].includes(l)) return "family";
+    return "colors";
+  }
+
+  const STATE_READY=0, STATE_PREP=1, STATE_CAPTURE=2;
+  let state=STATE_READY;
+  function setState(s){ state=s; stateBadge.textContent="State: "+["READY","PREP","CAPTURE"][s]; }
+
+  let targetGesture=null, correctCount=0, incorrectCount=0;
+  const SEQ_LEN=48, CAPTURE_MAX=120, CAPTURE_MS=5000;
+  let buf=[], running=false, frameSkip=1, frameCounter=0, autoJudge=false, captureStartMs=0;
+
+  document.querySelectorAll(".category-btn").forEach(btn=>{
+    btn.onclick=()=>{
+      const list=categories[btn.dataset.cat]||[];
+      const html=list.map(g=>'<button class="btn btn-primary m-1 choiceBtn">'+g+'</button>').join("");
+      const slot=document.getElementById("gestureChoices");
+      slot.innerHTML=html;
+      slot.querySelectorAll(".choiceBtn").forEach(b=>{
+        b.onclick=()=>{
+          targetGesture=b.textContent;
+          targetLabel.textContent=targetGesture;
+          resultText.textContent="—";
+          assistRow.style.display='none';
+          ghostEnabled=false; ghostFrames=null; ghostReady=false; ghostIdx=0;
+          ghostBadge.style.display='none'; ghostControls.style.display='none';
+        };
+      });
+    };
+  });
+
+  function flattenHand(lms){ if(!lms) return new Float32Array(63); const a=[]; for(let i=0;i<21;i++){ const p=lms[i]; a.push(p.x,p.y,p.z);} return new Float32Array(a); }
+  function lm(list,idx){ if(!list||idx>=list.length) return {x:NaN,y:NaN,z:NaN}; return list[idx]; }
+  function dist2D(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy)||1e-6; }
+
+  function normalizeGlobal(hand63,anchors){
+    if(!hand63||hand63.length!==63||!anchors.L_SH||!anchors.R_SH) return new Float32Array(63);
+    const out=new Float32Array(63);
+    const Cx=(anchors.L_SH.x+anchors.R_SH.x)/2;
+    const Cy=(anchors.L_SH.y+anchors.R_SH.y)/2;
+    const Cz=(anchors.L_SH.z+anchors.R_SH.z)/2;
+    const scale=Math.max(1e-6,dist2D(anchors.L_SH,anchors.R_SH));
+    for(let i=0;i<63;i+=3){
+      out[i]=(hand63[i]-Cx)/scale;
+      out[i+1]=(hand63[i+1]-Cy)/scale;
+      out[i+2]=(hand63[i+2]-Cz)/scale;
+    }
+    for(let i=0;i<63;i++) out[i]=Math.max(-5,Math.min(5,out[i]));
+    return out;
+  }
+
+  function derivedAltitudeFeatures(L,R,anchors){
+    const out=[];
+    const brow_y=0.5*(anchors.brow_r.y+anchors.brow_l.y);
+    const SEL=[0,4,8,12,16,20];
+    for(const H of [L,R]){
+      for(const j of SEL){
+        const by=j*3+1, bz=j*3+2;
+        const py=H[by], pz=H[bz];
+        out.push(py-anchors.chin.y, py-anchors.lip_u.y, py-brow_y, py-anchors.forehead.y, pz-anchors.nose.z);
+      }
+    }
+    return new Float32Array(out);
+  }
+
+  function packFeature(res){
+    const pose=res.poseLandmarks||[], face=res.faceLandmarks||[];
+    const anchors={};
+    anchors.L_SH=lm(pose,11); anchors.R_SH=lm(pose,12);
+    anchors.nose=lm(face,1); anchors.forehead=lm(face,10);
+    anchors.lip_u=lm(face,13); anchors.brow_r=lm(face,65); anchors.brow_l=lm(face,295);
+    anchors.chin=lm(face,152);
+    const Lh=res.rightHandLandmarks?flattenHand(res.rightHandLandmarks):null;
+    const Rh=res.leftHandLandmarks?flattenHand(res.leftHandLandmarks):null;
+    const lf=Lh?1:0, rf=Rh?1:0;
+    if(!Lh && !Rh) return null;
+    const L=normalizeGlobal(Lh,anchors), R=normalizeGlobal(Rh,anchors);
+    const alt=derivedAltitudeFeatures(L,R,anchors);
+    return new Float32Array([...L,...R,...alt,lf,rf]);
+  }
+
+  function temporalFix(frames,seqLen){
+    if(frames.length<=seqLen){
+      const pad=Array.from({length:seqLen-frames.length},()=>frames[frames.length-1]);
+      return frames.concat(pad);
+    }
+    const scores=new Array(frames.length).fill(0);
+    for(let i=1;i<frames.length;i++){
+      const f0=frames[i-1], f1=frames[i]; if(!f0||!f1) continue;
+      let motion=0; for(let j=0;j<f0.length-2;j++) motion+=Math.abs(f1[j]-f0[j]);
+      motion/=(f0.length-2);
+      const presence=f1[f1.length-2]+f1[f1.length-1];
+      scores[i]=0.7*motion+0.3*presence;
+    }
+    const W=Math.min(40,frames.length);
+    let bestStart=0, bestSum=-1e9, runSum=0;
+    for(let i=0;i<W;i++) runSum+=scores[i]; bestSum=runSum;
+    for(let i=1;i<=scores.length-W;i++){
+      runSum+=scores[i+W-1]-scores[i-1];
+      if(runSum>bestSum){bestSum=runSum; bestStart=i;}
+    }
+    const selected=frames.slice(bestStart,bestStart+W);
+    const step=selected.length/seqLen;
+    const aligned=[];
+    for(let i=0;i<seqLen;i++){
+      const idx=Math.min(Math.floor(i*step),selected.length-1);
+      aligned.push(selected[idx]);
+    }
+    return aligned;
+  }
+
+  function updateBuffer(f){
+    if(buf.length<CAPTURE_MAX) buf.push(f);
+    else { buf.shift(); buf.push(f); }
+    frameCountEl.textContent=Math.min(buf.length,SEQ_LEN);
+    progressBar.style.width=Math.min(100,Math.round((buf.length/CAPTURE_MAX)*100))+"%";
+    if(state===STATE_CAPTURE && captureStartMs){
+      const t=Math.max(0,Math.min(1,(Date.now()-captureStartMs)/CAPTURE_MS));
+      timerBar.style.width=(t*100).toFixed(1)+'%';
+    }else{
+      timerBar.style.width='0%';
+    }
+    if(buf.length>=CAPTURE_MAX && !autoJudge){
+      autoJudge=true; setTimeout(()=>stopAndPredict(),200);
+    }
+  }
+
+  const PREDICT_URL = location.origin + '/predict';
+  async function callPredict(sequence) {
+  const payload = {
+  method:'POST',
+  headers:{ 'Content-Type':'application/json' },
+  body: JSON.stringify({ sequence: sequence })
+};
+  const res = await fetch(PREDICT_URL, payload);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+  }
+  
+  function parsePrediction(j){
+    let label=j.label;
+    if(!label && j.pred && typeof j.pred==='object') label=j.pred.label||j.pred.class;
+    if(!label && Array.isArray(j.topk) && j.topk.length) label=j.topk[0].label||j.topk[0].class||j.topk[0].name;
+    if(label){ label = normLabel(label.split('_').pop()); }
+    return { label };
+  }
+
+  async function predictOnce(){
+  if (buf.length < 20) { 
+    alert('Not enough data.'); 
+    return; 
+  }
+
+  const fixed = temporalFix(buf, SEQ_LEN);
+  const seq = fixed.flatMap(f => Array.from(f));
+
+  try {
+      const j = await callPredict(seq);
+      let predicted = j.prediction || j.label || j.pred?.label;
+
+      // ✅ Normalize the predicted label to remove prefixes like "Color_", "Family_", "Numbers_"
+      if (predicted && predicted.includes("_")) {
+        predicted = predicted.split("_").pop();
+      }
+      predicted = normLabel(predicted);
+
+      const target = normLabel(targetGesture || '');
+
+      if (predicted && target && predicted === target) {
+          correctCount++;
+          resultText.textContent = '✅ Correct';
+          resultText.className = 'fs-4 fw-bold text-success';
+          correctCountEl.textContent = String(correctCount);
+          assistRow.style.display = 'none';
+      } else {
+          incorrectCount++;
+          resultText.textContent = '❌ Incorrect';
+          resultText.className = 'fs-4 fw-bold text-danger';
+          incorrectCountEl.textContent = String(incorrectCount);
+          assistRow.style.display = 'block';
+          assistHint.textContent = 'Watch the overlay, then try again.';
+      }
+  } catch (e) {
+      console.error(e);
+      resultText.textContent = '⚠️ Prediction error';
+      resultText.className = 'fs-4 fw-bold text-warning';
+      assistRow.style.display = 'block';
+      assistHint.textContent = 'Check that the backend is running and reachable.';
+  }
+}
+
+  async function stopAndPredict(){
+    if(state!==STATE_CAPTURE && state!==STATE_PREP) return;
+    running=false; recBadge.style.display='none'; capturePhase.textContent='Predicting…';
+    camera.stop(); await predictOnce();
+    setTimeout(()=>{ setState(STATE_READY); capturePhase.textContent='Idle'; startBtn.style.display='inline-block'; stopBtn.style.display='none'; autoJudge=false; timerBar.style.width='0%'; },200);
+  }
+
+  const HAND_CONN = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20]];
+  let ghostEnabled=false, ghostFrames=null, ghostIdx=0, ghostReady=false;
+  let previewMode=false;
+
+  let scaleMultiplier = 1.08;
+  let yOffset = -0.08;
+  let ghostPlaybackSpeed = 0.25;
+
+  function showGhostUI(show){
+    ghostBadge.style.display = show ? 'inline-block' : 'none';
+    ghostControls.style.display = show ? 'flex' : 'none';
+  }
+
+  btnSizeUp.onclick    = () => { scaleMultiplier = Math.min(1.6, scaleMultiplier + 0.04); };
+  btnSizeDown.onclick  = () => { scaleMultiplier = Math.max(0.7, scaleMultiplier - 0.04); };
+  btnNudgeUp.onclick   = () => { yOffset -= 0.01; };
+  btnNudgeDown.onclick = () => { yOffset += 0.01; };
+
+  window.addEventListener('keydown', (e) => {
+    if(!ghostEnabled) return;
+    if(e.key === '=' || e.key === '+') { scaleMultiplier = Math.min(1.6, scaleMultiplier + 0.04); }
+    if(e.key === '-') { scaleMultiplier = Math.max(0.7, scaleMultiplier - 0.04); }
+    if(e.key === 'ArrowUp') { yOffset -= 0.01; }
+    if(e.key === 'ArrowDown') { yOffset += 0.01; }
+  });
+
+  function anchorsValid(a){
+    if(!a || !a.L_SH || !a.R_SH) return false;
+    return Number.isFinite(a.L_SH.x) && Number.isFinite(a.R_SH.x) && Number.isFinite(a.L_SH.y) && Number.isFinite(a.R_SH.y) && dist2D(a.L_SH, a.R_SH) > 0.02;
+  }
+
+  async function startPreviewIfNeeded(){
+    if(state!==STATE_CAPTURE && !previewMode){
+      previewMode=true;
+      capturePhase.textContent='Preview (overlay)…';
+      setState(STATE_READY);
+      timerBar.style.width='0%';
+      await camera.start();
+    }
+  }
+  async function stopPreviewIfAny(){
+    if(previewMode){
+      previewMode=false;
+      capturePhase.textContent='Idle';
+      try{ await camera.stop(); }catch(_){}
+    }
+  }
+
+  async function findDemoUrl(cat, key){
+    const names=[];
+    for(let i=1;i<=10;i++) names.push(key + '_' + String(i).padStart(2,'0') + '.mp4');
+    names.push(key + '.mp4');
+    for(const n of names){
+      const url = STATIC_BASE + '/' + cat + '/' + n;
+      try{
+        const r=await fetch(url,{method:'HEAD',cache:'no-store'});
+        if(r.ok) return url;
+      }catch(_){}
+    }
+    return null;
+  }
+
+  function drawGhostHand(norm63, anchors, ctx, color){
+    if (!norm63) return;
+    const baseScale=Math.max(1e-6, dist2D(anchors.L_SH, anchors.R_SH));
+    const scale = baseScale * scaleMultiplier;
+    const Cx=(anchors.L_SH.x+anchors.R_SH.x)/2;
+    const Cy=(anchors.L_SH.y+anchors.R_SH.y)/2 + yOffset;
+    const pts=[];
+    for (let i=0;i<63;i+=3){
+      const x = norm63[i  ]*scale + Cx;
+      const y = norm63[i+1]*scale + Cy;
+      pts.push({x:x, y:y});
+    }
+    ctx.save();
+    ctx.globalCompositeOperation='screen';
+    ctx.strokeStyle=color;
+    ctx.lineWidth=4.5;
+    ctx.fillStyle=color;
+    ctx.shadowBlur=18;
+    ctx.shadowColor=color;
+    const W=canvasEl.width, H=canvasEl.height;
+    for (let k=0;k<HAND_CONN.length;k++){
+      const a=HAND_CONN[k][0], b=HAND_CONN[k][1];
+      const p=pts[a], q=pts[b];
+      ctx.beginPath(); ctx.moveTo(p.x*W, p.y*H); ctx.lineTo(q.x*W, q.y*H); ctx.stroke();
+    }
+    for (let i=0;i<pts.length;i++){
+      const p=pts[i]; ctx.beginPath(); ctx.arc(p.x*W, p.y*H, 5.2, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  async function loadGhostFor(label){
+    const cat=inferCategory(label);
+    const key=normLabel(label);
+    assistHint.textContent='Loading demo overlay…';
+    showGhostUI(false);
+    const url=await findDemoUrl(cat,key);
+    if(!url){ assistHint.textContent='No demo found for '+cat+'/'+key; ghostReady=false; return false; }
+    const v=document.createElement('video');
+    v.src=url; v.muted=true; v.playsInline=true; v.crossOrigin='anonymous';
+    await new Promise((resolve,reject)=>{ v.onloadedmetadata=resolve; v.onerror=()=>reject(new Error('Video error')); });
+    const ghostHolistic=new Holistic({locateFile:function(f){ return 'https://cdn.jsdelivr.net/npm/@mediapipe/holistic/'+f; }});
+    ghostHolistic.setOptions({selfieMode:false,modelComplexity:1,smoothLandmarks:true,refineFaceLandmarks:false,minDetectionConfidence:0.5,minTrackingConfidence:0.5});
+    ghostFrames=[];
+    ghostHolistic.onResults(res=>{
+      const pose=res.poseLandmarks||[], face=res.faceLandmarks||[];
+      const anchors={};
+      anchors.L_SH=lm(pose,11); anchors.R_SH=lm(pose,12);
+      anchors.nose=lm(face,1); anchors.forehead=lm(face,10);
+      anchors.lip_u=lm(face,13); anchors.brow_r=lm(face,65); anchors.brow_l=lm(face,295);
+      anchors.chin=lm(face,152);
+      const Lh=res.rightHandLandmarks?flattenHand(res.rightHandLandmarks):null;
+      const Rh=res.leftHandLandmarks?flattenHand(res.leftHandLandmarks):null;
+      if(!Lh && !Rh) return;
+      const L=Lh?normalizeGlobal(Lh,anchors):new Float32Array(63);
+      const R=Rh?normalizeGlobal(Rh,anchors):new Float32Array(63);
+      ghostFrames.push({L:L, R:R});
+    });
+    const total=Math.min(24, Math.max(12, Math.floor(v.duration*6)));
+    for(let i=0;i<total;i++){
+      v.currentTime = (v.duration * i)/total;
+      await new Promise(function(r){ v.onseeked=r; });
+      await ghostHolistic.send({image:v});
+    }
+    ghostReady = ghostFrames.length>0;
+    assistHint.textContent = ghostReady ? 'Overlay loaded. Use Size/Align controls if needed.' : 'No hands detected in demo video.';
+    return ghostReady;
+  }
+
+  let ghostTimer=null;
+  const GHOST_DURATION_MS=12000;
+
+  btnShowHow.onclick = async () => {
+    if(!targetGesture) return;
+    ghostEnabled=true; ghostFrames=null; ghostReady=false; ghostIdx=0;
+    await startPreviewIfNeeded();
+    const ok = await loadGhostFor(targetGesture);
+    if (ok){
+      showGhostUI(true);
+      if (ghostTimer) clearTimeout(ghostTimer);
+      ghostTimer=setTimeout(() => {
+        ghostEnabled=false; showGhostUI(false); assistHint.textContent='';
+      }, GHOST_DURATION_MS);
+    }else{
+      ghostEnabled=false; showGhostUI(false);
+    }
+  };
+
+  btnTryAgain.onclick = async () => {
+    ghostEnabled=false; showGhostUI(false); assistHint.textContent='';
+    await stopPreviewIfAny();
+    resultText.textContent='—';
+    startBtn.click();
+  };
+
+  const holistic=new Holistic({locateFile:function(f){ return 'https://cdn.jsdelivr.net/npm/@mediapipe/holistic/'+f; }});
+  holistic.setOptions({selfieMode:false,modelComplexity:2,smoothLandmarks:true,refineFaceLandmarks:false,minDetectionConfidence:0.55,minTrackingConfidence:0.55});
+  holistic.onResults(function(res){
+    ctx.save(); ctx.clearRect(0,0,canvasEl.width,canvasEl.height);
+    ctx.drawImage(res.image,0,0,canvasEl.width,canvasEl.height);
+    const pose=res.poseLandmarks||[], face=res.faceLandmarks||[];
+    const anchors={};
+    anchors.L_SH=lm(pose,11); anchors.R_SH=lm(pose,12);
+    anchors.nose=lm(face,1); anchors.forehead=lm(face,10);
+    anchors.lip_u=lm(face,13); anchors.brow_r=lm(face,65); anchors.brow_l=lm(face,295);
+    anchors.chin=lm(face,152);
+
+    if (ghostEnabled && ghostReady && anchorsValid(anchors) && ghostFrames && ghostFrames.length){
+      const total=ghostFrames.length;
+      ghostIdx+=ghostPlaybackSpeed; if(ghostIdx>=total) ghostIdx=0;
+      const frameA=ghostFrames[Math.floor(ghostIdx)%total];
+      const frameB=ghostFrames[Math.floor(ghostIdx+1)%total];
+      const t=ghostIdx%1;
+      const L=new Float32Array(63); const R=new Float32Array(63);
+      for(let i=0;i<63;i++){L[i]=(1-t)*frameA.L[i]+t*frameB.L[i]; R[i]=(1-t)*frameA.R[i]+t*frameB.R[i];}
+      drawGhostHand(L, anchors, ctx, 'rgba(59,130,246,0.85)');
+      drawGhostHand(R, anchors, ctx, 'rgba(34,197,94,0.85)');
+      showGhostUI(true);
+    } else if (ghostEnabled && !anchorsValid(anchors)) {
+      assistHint.textContent = 'Step back so both shoulders are visible.';
+      showGhostUI(false);
+    } else {
+      showGhostUI(false);
+    }
+    ctx.restore();
+
+    const shL=lm(pose,11), shR=lm(pose,12);
+    const sd=(isFinite(shL.x)&&isFinite(shR.x))?dist2D(shL,shR).toFixed(3):'nan';
+    hud.textContent='ShoulderDist: '+sd;
+
+    if(running && state===STATE_CAPTURE){
+      frameCounter++;
+      if(frameCounter%frameSkip===0){
+        const feat=packFeature(res);
+        if(feat) updateBuffer(feat);
+      }
+      if(Date.now()-captureStartMs>=CAPTURE_MS && !autoJudge){
+        autoJudge=true; setTimeout(function(){ stopAndPredict(); },120);
+      }
+    }
+  });
+
+  const camera=new Camera(videoEl,{ onFrame:async function(){ await holistic.send({image:videoEl}); }, width:640, height:480 });
+
+  function setStateAndUIReady(){
+    setState(STATE_READY);
+    capturePhase.textContent='Idle';
+    startBtn.style.display='inline-block';
+    stopBtn.style.display='none';
+    autoJudge=false;
+    timerBar.style.width='0%';
+  }
+
+  const originalStart = () => {
+    if(!targetGesture){ alert('Select a gesture first.'); return; }
+    buf=[]; frameCounter=0; autoJudge=false; setState(STATE_PREP);
+    prepOverlay.style.display='block'; recBadge.style.display='none';
+    startBtn.style.display='none'; stopBtn.style.display='inline-block';
+    resultText.textContent='—'; capturePhase.textContent='Get Ready…'; running=true; camera.start();
+    timerBar.style.width='0%'; assistRow.style.display='none';
+    setTimeout(function(){
+      setState(STATE_CAPTURE); prepOverlay.style.display='none';
+      recBadge.style.display='inline-block'; capturePhase.textContent='Perform Now (~5 s)…';
+      captureStartMs=Date.now();
+    }, 1000);
+  };
+  startBtn.onclick = async () => { await stopPreviewIfAny(); originalStart(); };
+
+  const originalStop = async () => { await stopAndPredict(); };
+  stopBtn.onclick = async () => { await stopPreviewIfAny(); await originalStop(); };
+
+  const originalReset = () => {
+    correctCount=0; incorrectCount=0;
+    correctCountEl.textContent='0'; incorrectCountEl.textContent='0';
+    targetGesture=null; targetLabel.textContent='None'; resultText.textContent='—';
+    assistRow.style.display='none'; assistHint.textContent='';
+    ghostEnabled=false; ghostFrames=null; ghostIdx=0; ghostReady=false; showGhostUI(false);
+    buf=[]; frameCounter=0; frameCountEl.textContent='0'; progressBar.style.width='0%'; timerBar.style.width='0%';
+    capturePhase.textContent='Idle'; setState(STATE_READY);
+    startBtn.style.display='inline-block'; stopBtn.style.display='none';
+    scaleMultiplier=1.08; yOffset=-0.02; ghostPlaybackSpeed=0.5;
+  };
+  resetBtn.onclick = async () => { await stopPreviewIfAny(); originalReset(); };
+
+  function resize(){ canvasEl.width=videoEl.clientWidth; canvasEl.height=videoEl.clientHeight; }
+  new ResizeObserver(resize).observe(videoEl);
+  resize();
+});
+</script>
+
+{% endblock %}

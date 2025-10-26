@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block title %}Auto Recognition – FSL Learning{% endblock %}
+{% block content %}
+
+<section class="section py-5" style="min-height:90vh;background:rgba(250,250,255,0.7);backdrop-filter:blur(6px);">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold text-primary mb-0">🤖 Auto Recognition Mode</h4>
+      <span id="stateBadge" class="badge bg-secondary text-dark fs-6 px-3 py-2 shadow-sm">State: READY</span>
+    </div>
+
+    <div class="row g-4 align-items-stretch mb-4">
+      <!-- Camera -->
+      <div class="col-lg-7 position-relative">
+        <div class="card shadow-sm border-0 h-100 rounded-4 position-relative overflow-hidden">
+          <video id="cam" autoplay playsinline muted
+                 style="width:100%;height:100%;background:#000;aspect-ratio:4/3;border-radius:1rem;transform:scaleX(-1);"></video>
+          <canvas id="overlay" style="position:absolute;inset:0;border-radius:1rem;pointer-events:none;"></canvas>
+          <div id="recBadge"
+               class="position-absolute top-0 start-0 m-3 px-3 py-1 rounded-pill fw-bold"
+               style="display:none;z-index:9;background:#b10000;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.3);">
+            ● LIVE
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-5">
+        <div class="card shadow-sm border-0 p-4 h-100 rounded-4">
+          <h6 class="text-muted mb-1">Detected Gesture</h6>
+          <p id="detLabel" class="fs-4 text-primary fw-bold mb-0">—</p>
+          <p id="detStatus" class="fs-5 fw-bold text-secondary mt-2">Idle</p>
+          <p id="frameInfo" class="text-muted mb-1">Frames Captured: 0</p>
+
+          <hr>
+          <h6 class="text-muted mb-2">Recognition Settings</h6>
+          <label class="d-flex justify-content-between align-items-center mb-3">
+            <span>🖐 Show Landmarks & Bounding Boxes</span>
+            <input type="checkbox" id="toggleVisuals" checked>
+          </label>
+
+          <hr>
+          <h6 class="text-muted mb-2">Recent Predictions</h6>
+          <div id="history"
+               style="font-family:ui-monospace,Consolas,monospace;font-size:.95rem;
+                      max-height:140px;overflow:auto;border:1px dashed var(--neutral-300);
+                      border-radius:12px;padding:.5rem;">
+            <div class="text-muted">No predictions yet…</div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button id="startBtn" class="btn btn-success btn-lg shadow-sm">▶ Start</button>
+            <button id="stopBtn" class="btn btn-danger btn-lg shadow-sm" style="display:none;">⏹ Stop / Predict</button>
+            <button id="clearBtn" class="btn btn-outline-secondary btn-lg shadow-sm">Clear History</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MediaPipe -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js"></script>
+
+<script>
+(() => {
+  const videoEl=document.getElementById('cam');
+  const canvasEl=document.getElementById('overlay');
+  const ctx=canvasEl.getContext('2d');
+  const startBtn=document.getElementById('startBtn');
+  const stopBtn=document.getElementById('stopBtn');
+  const clearBtn=document.getElementById('clearBtn');
+  const detLabel=document.getElementById('detLabel');
+  const detStatus=document.getElementById('detStatus');
+  const recBadge=document.getElementById('recBadge');
+  const historyEl=document.getElementById('history');
+  const stateBadge=document.getElementById('stateBadge');
+  const frameInfo=document.getElementById('frameInfo');
+  const toggleVisuals=document.getElementById('toggleVisuals');
+
+  const PREDICT_URL=location.origin+'/predict_auto';
+  const SEQ_LEN=48;
+  let buf=[],running=false,handsPresent=false,frameCount=0,showVisuals=true;
+
+  // --- helpers ---
+  function flattenHand(lms){if(!lms)return new Float32Array(63);const a=[];for(let i=0;i<21;i++){const p=lms[i];a.push(p.x,p.y,p.z);}return new Float32Array(a);}
+  function lm(list,idx){if(!list||idx>=list.length)return{x:NaN,y:NaN,z:NaN};return list[idx];}
+  function dist2D(a,b){const dx=a.x-b.x,dy=a.y-b.y;return Math.hypot(dx,dy)||1e-6;}
+  function normalizeGlobal(hand63,a){
+    if(!hand63||hand63.length!==63||!a.L_SH||!a.R_SH)return new Float32Array(63);
+    const out=new Float32Array(63);
+    const Cx=(a.L_SH.x+a.R_SH.x)/2,Cy=(a.L_SH.y+a.R_SH.y)/2,Cz=(a.L_SH.z+a.R_SH.z)/2;
+    const scale=Math.max(1e-6,dist2D(a.L_SH,a.R_SH));
+    for(let i=0;i<63;i+=3){out[i]=(hand63[i]-Cx)/scale;out[i+1]=(hand63[i+1]-Cy)/scale;out[i+2]=(hand63[i+2]-Cz)/scale;}
+    return out;
+  }
+  function derivedAltitudeFeatures(L,R,a){
+    const out=[],SEL=[0,4,8,12,16,20],brow_y=0.5*(a.brow_r.y+a.brow_l.y);
+    for(const H of [L,R]){
+      for(const j of SEL){
+        const by=j*3+1,bz=j*3+2;
+        const py=H[by],pz=H[bz];
+        out.push(py-a.chin.y,py-a.lip_u.y,py-brow_y,py-a.forehead.y,pz-a.nose.z);
+      }
+    }
+    return new Float32Array(out);
+  }
+  function packFeature(res){
+    const p=res.poseLandmarks||[],f=res.faceLandmarks||[];
+    const a={L_SH:lm(p,11),R_SH:lm(p,12),nose:lm(f,1),forehead:lm(f,10),
+             lip_u:lm(f,13),brow_r:lm(f,65),brow_l:lm(f,295),chin:lm(f,152)};
+    const Lh=res.rightHandLandmarks?flattenHand(res.rightHandLandmarks):null;
+    const Rh=res.leftHandLandmarks?flattenHand(res.leftHandLandmarks):null;
+    if(!Lh&&!Rh)return null;
+    const L=normalizeGlobal(Lh,a),R=normalizeGlobal(Rh,a);
+    const alt=derivedAltitudeFeatures(L,R,a);
+    return new Float32Array([...L,...R,...alt,Lh?1:0,Rh?1:0]);
+  }
+  function temporalFix(frames,n){
+    if(frames.length<=n){
+      const pad=Array.from({length:n-frames.length},()=>frames[frames.length-1]);
+      return frames.concat(pad);
+    }
+    const step=frames.length/n;const out=[];
+    for(let i=0;i<n;i++){const idx=Math.min(Math.floor(i*step),frames.length-1);out.push(frames[idx]);}
+    return out;
+  }
+
+  // --- mediapipe setup ---
+  const holistic=new Holistic({locateFile:f=>'https://cdn.jsdelivr.net/npm/@mediapipe/holistic/'+f});
+  holistic.setOptions({selfieMode:false,modelComplexity:2,smoothLandmarks:true,
+                       refineFaceLandmarks:false,minDetectionConfidence:0.55,minTrackingConfidence:0.55});
+
+  holistic.onResults(res=>{
+    ctx.clearRect(0,0,canvasEl.width,canvasEl.height);
+    ctx.drawImage(res.image,0,0,canvasEl.width,canvasEl.height);
+    const RH=res.rightHandLandmarks, LH=res.leftHandLandmarks;
+    handsPresent=!!(RH||LH);
+
+    if(showVisuals && handsPresent){
+      const drawBox=(h,color)=>{
+        let minX=1,minY=1,maxX=0,maxY=0;
+        h.forEach(p=>{if(p.x<minX)minX=p.x;if(p.x>maxX)maxX=p.x;if(p.y<minY)minY=p.y;if(p.y>maxY)maxY=p.y;});
+        ctx.strokeStyle=color;ctx.lineWidth=3;
+        ctx.strokeRect(minX*canvasEl.width,minY*canvasEl.height,(maxX-minX)*canvasEl.width,(maxY-minY)*canvasEl.height);
+        h.forEach(p=>{ctx.beginPath();ctx.arc(p.x*canvasEl.width,p.y*canvasEl.height,4,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();});
+      };
+      if(RH)drawBox(RH,'rgba(0,255,0,0.8)');
+      if(LH)drawBox(LH,'rgba(255,0,0,0.8)');
+    }
+
+    const feat=packFeature(res);
+    if(running && feat){
+      buf.push(feat);
+      frameCount=buf.length;
+      frameInfo.textContent='Frames Captured: '+frameCount;
+    }
+  });
+
+  const camera=new Camera(videoEl,{onFrame:async()=>{await holistic.send({image:videoEl});},width:640,height:480});
+
+  // --- predict ---
+  async function predict(){
+    if(buf.length<5){
+      detStatus.textContent='⚠ No gesture detected';
+      detStatus.className='fs-5 fw-bold text-warning';
+      return;
+    }
+    detStatus.textContent='🤖 Predicting...';
+    detStatus.className='fs-5 fw-bold text-secondary';
+    const fixed=temporalFix(buf,SEQ_LEN);
+    const seq=fixed.flatMap(f=>Array.from(f));
+    try{
+      const res=await fetch(PREDICT_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({sequence:seq})
+      });
+      const j=await res.json();
+
+      // ✅ Updated handling for "Incorrect but closest sign..."
+      if(j.prediction==='Incorrect'){
+        detLabel.textContent=j.message || '❌ Incorrect gesture';
+        detStatus.textContent='❌ Incorrect';
+        detStatus.className='fs-5 fw-bold text-danger';
+        addHistory(`❌ Closest: ${j.closest_sign}`,false);
+      } else {
+        detLabel.textContent=j.message || j.prediction;
+        detStatus.textContent='✅ Correct';
+        detStatus.className='fs-5 fw-bold text-success';
+        addHistory(`✅ ${j.prediction}`, true);
+      }
+
+    }catch(e){
+      detStatus.textContent='⚠ Prediction error';
+      detStatus.className='fs-5 fw-bold text-warning';
+    }
+  }
+
+  function addHistory(text,ok){
+    const line=document.createElement('div');
+    line.textContent=`${new Date().toLocaleTimeString()} ${text}`;
+    historyEl.querySelector('.text-muted')?.remove();
+    historyEl.prepend(line);
+    while(historyEl.children.length>12)historyEl.lastChild.remove();
+  }
+
+  // --- ui ---
+  toggleVisuals.onchange=()=>{showVisuals=toggleVisuals.checked;};
+
+  startBtn.onclick=async()=>{
+    if(running)return;
+    running=true;buf=[];frameCount=0;frameInfo.textContent='Frames Captured: 0';
+    detLabel.textContent='—';detStatus.textContent='Detecting Hands...';
+    detStatus.className='fs-5 fw-bold text-secondary';
+    recBadge.style.display='inline-block';
+    stateBadge.textContent='State: RECORDING';
+    await camera.start();
+    startBtn.style.display='none';
+    stopBtn.style.display='inline-block';
+  };
+
+  stopBtn.onclick=async()=>{
+    running=false;
+    recBadge.style.display='none';
+    stateBadge.textContent='State: PROCESSING';
+    try{await camera.stop();}catch(_){}
+    stopBtn.style.display='none';
+    startBtn.style.display='inline-block';
+    await predict();
+    stateBadge.textContent='State: READY';
+  };
+
+  clearBtn.onclick=()=>{historyEl.innerHTML='<div class="text-muted">No predictions yet…</div>';};
+
+  function resize(){canvasEl.width=videoEl.clientWidth;canvasEl.height=videoEl.clientHeight;}
+  new ResizeObserver(resize).observe(videoEl);resize();
+})();
+</script>
+
+{% endblock %}

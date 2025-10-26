@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}About Us - FSL Learning Team{% endblock %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="section animate-fade-in-up">
+  <div class="container text-center">
+    <h1 style="font-size:3rem;font-weight:900;margin-bottom:1rem;color:var(--ink);">Meet Our Team</h1>
+    <p class="muted" style="font-size:1.25rem;max-width:80ch;margin:0 auto;color: var(--white);
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.8), 1px 1px 3px rgba(0,0,0,0.9);">
+      Passionate innovators building the future of Filipino Sign Language education through AI-powered technology
+    </p>
+  </div>
+</section>
+
+<!-- Project Overview -->
+<section class="section">
+  <div class="container">
+    <div class="card animate-fade-in-up animate-delay-1">
+      <div style="text-align:center;margin-bottom:2rem;">
+        <h2 style="margin:0;color:var(--primary);font-size:2rem;">Our Mission</h2>
+      </div>
+
+      <div class="grid grid-2 animate-fade-in-up animate-delay-2">
+        <div>
+          <h3 style="color:var(--secondary);margin-bottom:1rem;display:flex;align-items:center;">
+            <div class="catppuccin--msbuild" style="margin-right:0.5rem;flex-shrink:0;"></div>
+            Building Inclusive Technology
+          </h3>
+          <p class="muted">
+            We're creating an innovative AI-powered platform that makes Filipino Sign Language learning accessible,
+            interactive, and effective. Our system combines advanced LSTM neural networks with intuitive design
+            to create a comprehensive learning experience.
+          </p>
+        </div>
+        <div>
+          <h3 style="color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;">
+            <div class="streamline-kameleon-color--light-bulb" style="margin-right:0.5rem;flex-shrink:0;"></div>
+            Key Features
+          </h3>
+          <ul style="margin:0;padding-left:1.5rem;">
+            <li class="muted">Provide real-time recognition and visual feedback for FSL gestures</li>
+            <li class="muted">Offer instructional videos to guide users in learning FSL</li>
+            <li class="muted">Deliver corrective feedback to help users improve their performance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Team Section -->
+<section class="section" style="background:var(--neutral-50);">
+  <div class="container">
+    <div class="text-center animate-fade-in-up">
+      <h2 style="font-size:2.5rem;font-weight:900;margin-bottom:1rem;color:var(--ink);">Our Development Team</h2>
+
+    </div>
+
+    <div class="grid grid-5 animate-fade-in-up animate-delay-1">
+      <!-- Bernardo, Christian Emmanuel -->
+      <div class="card text-center animate-fade-in-left animate-delay-2">
+        <div style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.5rem;overflow:hidden;border:3px solid var(--primary);">
+          <img src="{{ url_for('static', filename='img/Bernardo.png') }}" alt="Bernardo, Christian Emmanuel" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <h4 style="font-weight:800;font-size:1.125rem;color:var(--ink);margin-bottom:0.5rem;">Bernardo, Christian Emmanuel</h4>
+        <div style="padding:0.5rem 1rem;background:var(--primary);color:white;border-radius:var(--radius-full);font-size:0.875rem;font-weight:600;display:inline-block;">System Administration</div>
+        <p class="muted" style="margin-top:1rem;font-size:0.875rem;">Infrastructure and deployment specialist ensuring robust system performance.</p>
+      </div>
+
+      <!-- Carale, Alyzza R. -->
+      <div class="card text-center animate-fade-in-left animate-delay-3">
+        <div style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.5rem;overflow:hidden;border:3px solid var(--primary);">
+          <img src="{{ url_for('static', filename='img/Carale.png') }}" alt="Carale, Alyzza R." style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <h4 style="font-weight:800;font-size:1.125rem;color:var(--ink);margin-bottom:0.5rem;">Carale, Alyzza R.</h4>
+        <div style="padding:0.5rem 1rem;background:var(--primary);color:white;border-radius:var(--radius-full);font-size:0.875rem;font-weight:600;display:inline-block;">Cyber Physical Systems</div>
+        <p class="muted" style="margin-top:1rem;font-size:0.875rem;">Hardware-software integration expert bridging physical and digital worlds.</p>
+      </div>
+
+      <!-- Dela Rosa, John Errol -->
+      <div class="card text-center animate-fade-in-right animate-delay-4">
+        <div style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.5rem;overflow:hidden;border:3px solid var(--primary);">
+          <img src="{{ url_for('static', filename='img/Dela rosa.jpg') }}" alt="Dela Rosa, John Errol" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <h4 style="font-weight:800;font-size:1.125rem;color:var(--ink);margin-bottom:0.5rem;">Dela Rosa, John Errol</h4>
+        <div style="padding:0.5rem 1rem;background:var(--primary);color:white;border-radius:var(--radius-full);font-size:0.875rem;font-weight:600;display:inline-block;">Data Science</div>
+        <p class="muted" style="margin-top:1rem;font-size:0.875rem;">AI/ML specialist developing intelligent recognition algorithms.</p>
+      </div>
+
+      <!-- Doria, Jhon -->
+      <div class="card text-center animate-fade-in-right animate-delay-5">
+        <div style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.5rem;overflow:hidden;border:3px solid var(--primary);">
+          <img src="{{ url_for('static', filename='img/Doria.png') }}" alt="Doria, Jhon" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <h4 style="font-weight:800;font-size:1.125rem;color:var(--ink);margin-bottom:0.5rem;">Doria, Jhon</h4>
+        <div style="padding:0.5rem 1rem;background:var(--primary);color:white;border-radius:var(--radius-full);font-size:0.875rem;font-weight:600;display:inline-block;">Data Science</div>
+        <p class="muted" style="margin-top:1rem;font-size:0.875rem;">AI/ML specialist developing intelligent recognition algorithms and machine learning models.</p>
+      </div>
+
+      <!-- Montojo, Lance -->
+      <div class="card text-center animate-fade-in-up animate-delay-6">
+        <div style="width:80px;height:80px;border-radius:50%;margin:0 auto 1.5rem;overflow:hidden;border:3px solid var(--primary);">
+          <img src="{{ url_for('static', filename='img/Montojo.png') }}" alt="Montojo, Lance" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <h4 style="font-weight:800;font-size:1.125rem;color:var(--ink);margin-bottom:0.5rem;">Montojo, Lance</h4>
+        <div style="padding:0.5rem 1rem;background:var(--primary);color:white;border-radius:var(--radius-full);font-size:0.875rem;font-weight:600;display:inline-block;">Data Science</div>
+        <p class="muted" style="margin-top:1rem;font-size:0.875rem;">Data analytics expert optimizing learning outcomes and user experience.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+{% endblock %}
