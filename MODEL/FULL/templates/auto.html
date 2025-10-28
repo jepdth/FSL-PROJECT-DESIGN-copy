@@ -30,7 +30,8 @@
           <h6 class="text-muted mb-1">Detected Gesture</h6>
           <p id="detLabel" class="fs-4 text-primary fw-bold mb-0">—</p>
           <p id="detStatus" class="fs-5 fw-bold text-secondary mt-2">Idle</p>
-          <p id="frameInfo" class="text-muted mb-1">Frames Captured: 0</p>
+          <!-- Frame counter hidden -->
+          <p id="frameInfo" class="text-muted mb-1" style="display:none;">Frames Captured: 0</p>
 
           <hr>
           <h6 class="text-muted mb-2">Recognition Settings</h6>
@@ -50,7 +51,7 @@
 
           <div class="d-flex gap-2 mt-4">
             <button id="startBtn" class="btn btn-success btn-lg shadow-sm">▶ Start</button>
-            <button id="stopBtn" class="btn btn-danger btn-lg shadow-sm" style="display:none;">⏹ Stop / Predict</button>
+            <button id="stopBtn" class="btn btn-danger btn-lg shadow-sm" style="display:none;">⏹ Stop</button>
             <button id="clearBtn" class="btn btn-outline-secondary btn-lg shadow-sm">Clear History</button>
           </div>
         </div>
@@ -82,6 +83,7 @@
   const PREDICT_URL=location.origin+'/predict_auto';
   const SEQ_LEN=48;
   let buf=[],running=false,handsPresent=false,frameCount=0,showVisuals=true;
+  let predictInterval=null;
 
   // --- helpers ---
   function flattenHand(lms){if(!lms)return new Float32Array(63);const a=[];for(let i=0;i<21;i++){const p=lms[i];a.push(p.x,p.y,p.z);}return new Float32Array(a);}
@@ -151,24 +153,19 @@
     }
 
     const feat=packFeature(res);
-    if(running && feat){
+    if (running && feat) {
       buf.push(feat);
-      frameCount=buf.length;
-      frameInfo.textContent='Frames Captured: '+frameCount;
+      if (buf.length > SEQ_LEN) buf.shift(); // keep only latest 48 frames
+      frameCount = buf.length;
+      frameInfo.textContent = 'Frames Captured: ' + frameCount;
     }
   });
 
   const camera=new Camera(videoEl,{onFrame:async()=>{await holistic.send({image:videoEl});},width:640,height:480});
 
-  // --- predict ---
+  // --- prediction ---
   async function predict(){
-    if(buf.length<5){
-      detStatus.textContent='⚠ No gesture detected';
-      detStatus.className='fs-5 fw-bold text-warning';
-      return;
-    }
-    detStatus.textContent='🤖 Predicting...';
-    detStatus.className='fs-5 fw-bold text-secondary';
+    if(buf.length<5)return;
     const fixed=temporalFix(buf,SEQ_LEN);
     const seq=fixed.flatMap(f=>Array.from(f));
     try{
@@ -179,7 +176,6 @@
       });
       const j=await res.json();
 
-      // ✅ Updated handling for "Incorrect but closest sign..."
       if(j.prediction==='Incorrect'){
         detLabel.textContent=j.message || '❌ Incorrect gesture';
         detStatus.textContent='❌ Incorrect';
@@ -206,30 +202,35 @@
     while(historyEl.children.length>12)historyEl.lastChild.remove();
   }
 
-  // --- ui ---
   toggleVisuals.onchange=()=>{showVisuals=toggleVisuals.checked;};
 
+  // --- continuous prediction mode ---
   startBtn.onclick=async()=>{
     if(running)return;
-    running=true;buf=[];frameCount=0;frameInfo.textContent='Frames Captured: 0';
+    running=true;buf=[];frameCount=0;
     detLabel.textContent='—';detStatus.textContent='Detecting Hands...';
     detStatus.className='fs-5 fw-bold text-secondary';
     recBadge.style.display='inline-block';
-    stateBadge.textContent='State: RECORDING';
+    stateBadge.textContent='State: LIVE';
     await camera.start();
     startBtn.style.display='none';
     stopBtn.style.display='inline-block';
+
+    // Predict every 5 seconds
+    predictInterval=setInterval(async()=>{
+      if(buf.length>=10) await predict();
+    },5000);
   };
 
   stopBtn.onclick=async()=>{
     running=false;
     recBadge.style.display='none';
-    stateBadge.textContent='State: PROCESSING';
+    stateBadge.textContent='State: STOPPED';
+    clearInterval(predictInterval);
+    predictInterval=null;
     try{await camera.stop();}catch(_){}
     stopBtn.style.display='none';
     startBtn.style.display='inline-block';
-    await predict();
-    stateBadge.textContent='State: READY';
   };
 
   clearBtn.onclick=()=>{historyEl.innerHTML='<div class="text-muted">No predictions yet…</div>';};
